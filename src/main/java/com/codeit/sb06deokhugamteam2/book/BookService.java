@@ -14,12 +14,16 @@ import java.util.UUID;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final ReviewService reviewService;
 
     public void deleteSoft(UUID bookId) {
-        bookRepository.findById(bookId).ifPresent(book -> {
-            book.setDeletedAsTrue();
-            bookRepository.save(book);
-            log.info("도서 논리 삭제 완료: {}", bookId);
-        });
+
+        reviewService.deleteSoftByBookId(UUID bookId);
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 도서입니다: {}", bookId));
+        book.setDeletedAsTrue();
+        bookRepository.save(book);
+        log.info("도서 논리 삭제 완료: {}", bookId);
     }
 }
