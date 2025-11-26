@@ -1,6 +1,6 @@
 package com.codeit.sb06deokhugamteam2.book.controller;
 
-import com.codeit.sb06deokhugamteam2.book.BookService;
+import com.codeit.sb06deokhugamteam2.book.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

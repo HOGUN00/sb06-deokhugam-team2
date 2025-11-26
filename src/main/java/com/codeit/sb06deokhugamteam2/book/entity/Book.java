@@ -1,16 +1,20 @@
-package com.codeit.sb06deokhugamteam2.book;
+package com.codeit.sb06deokhugamteam2.book.entity;
 
+import com.codeit.sb06deokhugamteam2.review.entity.Review;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -54,6 +58,11 @@ public class Book {
     @Builder.Default
     @Column(nullable = false, name = "rating_sum")
     private double ratingSum = 0.0;
+
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @BatchSize(size = 100)
+    private List<Review> reviews = new ArrayList<>();
 
     @CreatedDate
     @Column(nullable = false, name = "created_at")
