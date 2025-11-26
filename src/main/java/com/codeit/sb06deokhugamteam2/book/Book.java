@@ -66,4 +66,10 @@ public class Book {
     @Builder.Default
     @Column(nullable = false)
     private boolean deleted = false;
+
+    public void update(String thumbnailUrl) {
+        if (thumbnailUrl != null) {
+            this.thumbnailUrl = thumbnailUrl;
+        }
+    }
 }

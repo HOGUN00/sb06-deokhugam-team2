@@ -1,5 +1,6 @@
 package com.codeit.sb06deokhugamteam2.common.exception;
 
+import com.codeit.sb06deokhugamteam2.common.exception.exceptions.AWSException;
 import com.codeit.sb06deokhugamteam2.common.exception.exceptions.MDCException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> MDCExceptionHandler(MDCException ex) {
     ErrorResponse error = createErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, ex.getDetails());
     return ResponseEntity.status(error.getStatus()).body(error);
+  }
+
+  @ExceptionHandler(AWSException.class)
+  public ResponseEntity<ErrorResponse> AWSExceptionHandler(AWSException ex) {
+      ErrorResponse error = createErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, ex.getDetails());
+      return ResponseEntity.status(error.getStatus()).body(error);
   }
 
   /*
