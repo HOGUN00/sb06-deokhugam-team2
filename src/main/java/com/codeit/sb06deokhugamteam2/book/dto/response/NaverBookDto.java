@@ -18,9 +18,9 @@ public class NaverBookDto {
     private String isbn;
     private String thumbnailImage;
 
-    @JsonProperty(value = "pubdate", access = JsonProperty.Access.WRITE_ONLY)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
-    public void setPublishedDate(LocalDate pubdate) {
+    @JsonProperty(value = "pubdate")
+    @JsonFormat(pattern = "yyyyMMdd")
+    public void setPubdate(LocalDate pubdate) {
         this.publishedDate = pubdate;
     }
 
@@ -29,7 +29,7 @@ public class NaverBookDto {
         return publishedDate;
     }
 
-    @JsonProperty(value = "image", access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(value = "image")
     public void setImage(String imageUrl) {
         this.thumbnailImage = imageUrl;
     }

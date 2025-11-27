@@ -1,5 +1,6 @@
 package com.codeit.sb06deokhugamteam2.book.service;
 
+import com.codeit.sb06deokhugamteam2.book.client.NaverSearchClient;
 import com.codeit.sb06deokhugamteam2.book.dto.request.BookCreateRequest;
 import com.codeit.sb06deokhugamteam2.book.dto.data.BookDto;
 import com.codeit.sb06deokhugamteam2.book.dto.request.BookImageCreateRequest;
@@ -11,10 +12,8 @@ import com.codeit.sb06deokhugamteam2.book.storage.S3Storage;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +26,7 @@ public class BookService {
     private final BookRepository bookRepository;
     private final S3Storage s3Storage;
     private final BookMapper bookMapper;
+    private final NaverSearchClient naverSearchClient;
 
     public BookDto create(BookCreateRequest bookCreateRequest, Optional<BookImageCreateRequest> optionalBookImageCreateRequest) {
         Book book = Book.builder()
@@ -49,6 +49,10 @@ public class BookService {
         savedBook.update(thumbnailUrl);
 
         return bookMapper.toDto(savedBook);
+    }
+
+    public NaverBookDto info(String isbn) {
+        return naverSearchClient.bookSearchByIsbn(isbn);
     }
 
     public void deleteSoft(UUID bookId) {

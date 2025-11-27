@@ -5,10 +5,8 @@ import com.codeit.sb06deokhugamteam2.book.dto.data.BookDto;
 import com.codeit.sb06deokhugamteam2.book.dto.request.BookImageCreateRequest;
 import com.codeit.sb06deokhugamteam2.book.dto.response.NaverBookDto;
 import com.codeit.sb06deokhugamteam2.book.service.BookService;
-import com.codeit.sb06deokhugamteam2.book.service.NaverBookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +22,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
-    private final NaverBookService naverBookService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BookDto> create(
@@ -39,7 +36,7 @@ public class BookController {
 
     @GetMapping("/info")
     public ResponseEntity<NaverBookDto> info(@RequestParam(value = "isbn") String isbn) {
-        NaverBookDto naverBookDto = naverBookService.info(isbn);
+        NaverBookDto naverBookDto = bookService.info(isbn);
         return ResponseEntity.ok(naverBookDto);
     }
 
