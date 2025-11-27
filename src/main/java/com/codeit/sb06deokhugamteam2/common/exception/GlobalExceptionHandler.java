@@ -1,5 +1,6 @@
 package com.codeit.sb06deokhugamteam2.common.exception;
 
+import com.codeit.sb06deokhugamteam2.common.exception.exceptions.AWSException;
 import com.codeit.sb06deokhugamteam2.common.exception.exceptions.MDCException;
 import com.codeit.sb06deokhugamteam2.common.exception.exceptions.NotificationException;
 import jakarta.validation.ConstraintViolation;
@@ -40,6 +41,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> MDCExceptionHandler(NotificationException ex) {
     ErrorResponse error = createErrorResponse(ex, ex.getHttpStatus(), ex.getDetails());
     return ResponseEntity.status(error.getStatus()).body(error);
+  }
+
+  @ExceptionHandler(AWSException.class)
+  public ResponseEntity<ErrorResponse> AWSExceptionHandler(AWSException ex) {
+      ErrorResponse error = createErrorResponse(ex, ex.getHttpStatus(), ex.getDetails());
+      return ResponseEntity.status(error.getStatus()).body(error);
   }
 
   /*
