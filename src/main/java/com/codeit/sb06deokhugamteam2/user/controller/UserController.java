@@ -22,13 +22,13 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserDto> register(@Valid @RequestBody UserRegisterRequest request) {
+    public ResponseEntity<UserDto> register(@RequestBody UserRegisterRequest request) {
         UserDto userDto = userService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDto> login(@Valid @RequestBody UserLoginRequest request) {
+    public ResponseEntity<UserDto> login(@RequestBody UserLoginRequest request) {
         UserDto userDto = userService.login(request);
         return ResponseEntity.ok(userDto);
     }
