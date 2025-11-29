@@ -62,7 +62,7 @@ public class BookController {
     public ResponseEntity<CursorPageResponsePopularBookDto> getPopularBookList(
             @RequestParam(defaultValue = "DAILY") PeriodType period,
             @RequestParam(defaultValue = "ASC") Sort.Direction direction,
-            @RequestParam(required = false) String cursor,        // 점수 기준 커서
+            @RequestParam(required = false) String cursor,        // 랭크 기준 커서
             @RequestParam(required = false) Instant after,        // 보조커서
             @RequestParam(defaultValue = "50") Integer limit
     ) {
