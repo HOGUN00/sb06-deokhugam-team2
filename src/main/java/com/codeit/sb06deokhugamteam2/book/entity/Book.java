@@ -1,6 +1,6 @@
 package com.codeit.sb06deokhugamteam2.book.entity;
 
-import com.codeit.sb06deokhugamteam2.review.infra.persistence.entity.Review;
+import com.codeit.sb06deokhugamteam2.review.adapter.out.entity.Review;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
