@@ -50,6 +50,10 @@ public class BookService {
     private final NaverSearchClient naverSearchClient;
 
     public BookDto create(BookCreateRequest bookCreateRequest, Optional<BookImageCreateRequest> optionalBookImageCreateRequest) {
+        if (bookRepository.existsByIsbn(bookCreateRequest.getIsbn())) {
+            throw new BookException(ErrorCode.DUPLICATE_BOOK, Map.of("isbn", bookCreateRequest.getIsbn()), HttpStatus.CONFLICT);
+        }
+
         Book book = Book.builder()
                 .isbn(bookCreateRequest.getIsbn())
                 .title(bookCreateRequest.getTitle())
