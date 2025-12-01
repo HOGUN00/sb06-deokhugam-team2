@@ -1,15 +1,15 @@
 package com.codeit.sb06deokhugamteam2.user.entity;
 
-import com.codeit.sb06deokhugamteam2.comment.entity.Comment;
-import com.codeit.sb06deokhugamteam2.review.infra.persistence.entity.Review;
-import com.codeit.sb06deokhugamteam2.review.infra.persistence.entity.ReviewLike;
+//import com.codeit.sb06deokhugamteam2.comment.entity.Comment;
+//import com.codeit.sb06deokhugamteam2.review.infra.persistence.entity.Review;
+//import com.codeit.sb06deokhugamteam2.review.infra.persistence.entity.ReviewLike;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+//import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+//import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,8 +19,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+//import java.util.ArrayList;
+//import java.util.List;
 import java.util.UUID;
 
 
@@ -59,17 +59,17 @@ public class User {
     @Column(name = "deleted_at") // 논리 삭제된 시간 필드 추가
     private LocalDateTime deletedAt;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Review> reviews = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Comment> comments = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<ReviewLike> reviewLikes = new ArrayList<>();
+//    @Builder.Default
+//    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+//    private List<Review> reviews = new ArrayList<>();
+//
+//    @Builder.Default
+//    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+//    private List<Comment> comments = new ArrayList<>();
+//
+//    @Builder.Default
+//    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+//    private List<ReviewLike> reviewLikes = new ArrayList<>();
 
     public User(String email, String nickname, String password) {
         this.email = email;

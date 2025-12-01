@@ -1,8 +1,8 @@
 package com.codeit.sb06deokhugamteam2.user.controller;
 
 
-import com.codeit.sb06deokhugamteam2.user.dto.CursorPageResponse;
-import com.codeit.sb06deokhugamteam2.user.dto.PowerUserDto;
+//import com.codeit.sb06deokhugamteam2.user.dto.CursorPageResponse;
+//import com.codeit.sb06deokhugamteam2.user.dto.PowerUserDto;
 import com.codeit.sb06deokhugamteam2.user.dto.UserDto;
 import com.codeit.sb06deokhugamteam2.user.dto.UserLoginRequest;
 import com.codeit.sb06deokhugamteam2.user.dto.UserRegisterRequest;
@@ -10,13 +10,13 @@ import com.codeit.sb06deokhugamteam2.user.dto.UserUpdateRequest;
 import com.codeit.sb06deokhugamteam2.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
+//import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.Map;
+//import java.time.LocalDateTime;
+//import java.util.Map;
 import java.util.UUID;
 
 
@@ -65,26 +65,26 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/batch-hard-delete")
-    public ResponseEntity<Map<String, Integer>> batchHardDeleteOldSoftDeletedUsers(
-            @RequestParam(defaultValue = "24") int hoursAgo) { // 기본값 1일(24시간)
-        int deletedCount = userService.batchHardDeleteOldSoftDeletedUsers(hoursAgo);
-        return ResponseEntity.ok(Map.of("deletedCount", deletedCount));
-    }
+//    @PostMapping("/batch-hard-delete")
+//    public ResponseEntity<Map<String, Integer>> batchHardDeleteOldSoftDeletedUsers(
+//            @RequestParam(defaultValue = "24") int hoursAgo) { // 기본값 1일(24시간)
+//        int deletedCount = userService.batchHardDeleteOldSoftDeletedUsers(hoursAgo);
+//        return ResponseEntity.ok(Map.of("deletedCount", deletedCount));
+//    }
 
-    @GetMapping("/power")
-    public ResponseEntity<CursorPageResponse<PowerUserDto>> getPowerUsers(
-            @RequestParam(defaultValue = "DAILY") String period,
-            @RequestParam(defaultValue = "DESC") String direction,
-            @RequestParam(required = false) String cursor,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime after,
-            @RequestParam(defaultValue = "50") int limit) {
-
-        LocalDateTime effectiveAfter = (after != null) ? after : LocalDateTime.now();
-
-        CursorPageResponse<PowerUserDto> response = userService.getPowerUsers(
-                period, direction, cursor, effectiveAfter, limit);
-
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/power")
+//    public ResponseEntity<CursorPageResponse<PowerUserDto>> getPowerUsers(
+//            @RequestParam(defaultValue = "DAILY") String period,
+//            @RequestParam(defaultValue = "DESC") String direction,
+//            @RequestParam(required = false) String cursor,
+//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime after,
+//            @RequestParam(defaultValue = "50") int limit) {
+//
+//        LocalDateTime effectiveAfter = (after != null) ? after : LocalDateTime.now();
+//
+//        CursorPageResponse<PowerUserDto> response = userService.getPowerUsers(
+//                period, direction, cursor, effectiveAfter, limit);
+//
+//        return ResponseEntity.ok(response);
+//    }
 }
