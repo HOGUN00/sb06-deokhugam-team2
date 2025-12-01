@@ -8,9 +8,13 @@ import com.codeit.sb06deokhugamteam2.comment.mapper.CommentMapper;
 import com.codeit.sb06deokhugamteam2.comment.repository.CommentRepository;
 import com.codeit.sb06deokhugamteam2.common.exception.ErrorCode;
 import com.codeit.sb06deokhugamteam2.common.exception.exceptions.CommentException;
-import com.codeit.sb06deokhugamteam2.review.entity.Review;
+import com.codeit.sb06deokhugamteam2.review.adapter.out.entity.Review;
+import com.codeit.sb06deokhugamteam2.review.application.port.out.ReviewRepository;
+import com.codeit.sb06deokhugamteam2.review.domain.exception.DuplicateReviewException;
 import com.codeit.sb06deokhugamteam2.user.entity.User;
 import com.codeit.sb06deokhugamteam2.user.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,8 +30,11 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
-    private final ReviewRepository reviewRepository;
     private final  CommentMapper commentMapper;
+    private final ReviewRepository reviewRepository;
+
+    @PersistenceContext
+    private EntityManager em;
 
 
     public CommentDto create(CommentCreateRequest request) {
@@ -39,9 +46,9 @@ public class CommentService {
 
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommentException(ErrorCode.USER_NOT_FOUND, Map.of("userId", userId), HttpStatus.NOT_FOUND))
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new CommentException(ErrorCode.NO_ID_VARIABLE, Map.of("reviewId", reviewId), HttpStatus.NOT_FOUND))
+                .orElseThrow(() -> new CommentException(ErrorCode.USER_NOT_FOUND, Map.of("userId", userId), HttpStatus.NOT_FOUND));
+
+        Review review = em.getReference(Review.class, reviewId);
 
 
         Comment comment = Comment.builder()
@@ -59,19 +66,29 @@ public class CommentService {
 
         log.info("updating comment : commentId = {},userId = {}",commentId,userId);
 
-        Comment findComment = commentRepository.findById(commentId)
+        Comment foundComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentException(ErrorCode.INVALID_DATA, Map.of("commentId", commentId), HttpStatus.NOT_FOUND));
 
-        if (!findComment.getUser().getId().equals(userId)) {
+        if (!foundComment.getUser().getId().equals(userId)) {
             throw new CommentException(ErrorCode.INVALID_USER_DATA, Map.of("userId", userId), HttpStatus.FORBIDDEN);
         }
 
-        findComment.updateComment(request.content());
+        foundComment.updateComment(request.content());
 
-        Comment updatedComment = commentRepository.save(findComment);
+        Comment updatedComment = commentRepository.save(foundComment);
 
         log.info("Comment updated with id: {}", updatedComment.getId());
 
         return commentMapper.toDto(updatedComment);
+    }
+
+    public CommentDto readComment(UUID commentId) {
+        log.info("reading comment : commentId = {}", commentId);
+
+        Comment foundComment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentException(ErrorCode.INVALID_DATA, Map.of("commentId", commentId), HttpStatus.NOT_FOUND));
+
+
+        return commentMapper.toDto(foundComment);
     }
 }

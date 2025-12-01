@@ -43,5 +43,13 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @GetMapping("/{commentId}")
+    public ResponseEntity<CommentDto> readComment(@PathVariable UUID commentId){
+        log.info("readComment commentID={}",commentId);
+
+        CommentDto response = commentService.readComment(commentId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
 }
