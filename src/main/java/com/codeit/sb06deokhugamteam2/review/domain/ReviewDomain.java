@@ -2,6 +2,7 @@ package com.codeit.sb06deokhugamteam2.review.domain;
 
 import com.codeit.sb06deokhugamteam2.review.application.port.in.command.CreateReviewCommand;
 import com.codeit.sb06deokhugamteam2.review.domain.exception.ReviewException;
+import com.codeit.sb06deokhugamteam2.review.domain.exception.ReviewPermissionDeniedException;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -152,6 +153,12 @@ public class ReviewDomain {
 
     public int rating() {
         return rating;
+    }
+
+    public void requireOwner(UUID requestUserId) {
+        if (!userId.equals(requestUserId)) {
+            throw new ReviewPermissionDeniedException(requestUserId);
+        }
     }
 
     public record Snapshot(

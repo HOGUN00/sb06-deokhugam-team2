@@ -9,7 +9,9 @@ import com.codeit.sb06deokhugamteam2.review.domain.ReviewDomain;
 import com.codeit.sb06deokhugamteam2.user.entity.User;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class ReviewJpaMapper {
@@ -55,5 +57,27 @@ public class ReviewJpaMapper {
             return nextReviewDetail.rating().toString();
         }
         return nextReviewDetail.createdAt().toString();
+    }
+
+    public ReviewDomain toReviewDomain(Review review) {
+        UUID id = review.id();
+        UUID bookId = review.book().getId();
+        UUID userId = review.user().getId();
+        Integer rating = review.rating();
+        String content = review.content();
+        Instant createdAt = review.createdAt();
+        Instant updatedAt = review.updatedAt();
+
+        var snapshot = new ReviewDomain.Snapshot(
+                id,
+                bookId,
+                userId,
+                rating,
+                content,
+                createdAt,
+                updatedAt
+        );
+
+        return ReviewDomain.loadSnapshot(snapshot);
     }
 }

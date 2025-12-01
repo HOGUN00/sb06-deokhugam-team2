@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.codeit.sb06deokhugamteam2.book.entity.QBook.book;
@@ -200,5 +201,18 @@ public class ReviewJpaRepository implements ReviewRepository {
     public ReviewDetail findReviewDetail(ReviewQuery query) {
         return findReviewDetail(query.requestUserId(), review.id.eq(query.reviewId()))
                 .fetchOne();
+    }
+
+    @Override
+    public Optional<ReviewDomain> findById(UUID reviewId) {
+        Review found = em.find(Review.class, reviewId);
+        return Optional.ofNullable(found).map(reviewMapper::toReviewDomain);
+    }
+
+    @Override
+    @Transactional
+    public void delete(ReviewDomain review) {
+        Review deleteReview = em.getReference(Review.class, review.id());
+        em.remove(deleteReview);
     }
 }

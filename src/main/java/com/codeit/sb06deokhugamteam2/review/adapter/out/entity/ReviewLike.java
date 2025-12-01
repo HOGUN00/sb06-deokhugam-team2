@@ -3,12 +3,14 @@ package com.codeit.sb06deokhugamteam2.review.adapter.out.entity;
 import com.codeit.sb06deokhugamteam2.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import java.time.Instant;
 import java.util.Objects;
 
 @Entity
-@Table(name = "ReviewLikes")
+@Table(name = "reviewlikes")
 public class ReviewLike {
 
     @EmbeddedId
@@ -22,6 +24,7 @@ public class ReviewLike {
     @MapsId("reviewId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "review_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Review review;
 
     @NotNull

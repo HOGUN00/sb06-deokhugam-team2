@@ -13,9 +13,7 @@ import java.util.UUID;
 
 @Entity
 @SoftDelete
-@Table(name = "Reviews", uniqueConstraints = {
-        @UniqueConstraint(name = "reviews_pk", columnNames = {"book_id", "user_id"})
-})
+@Table(name = "reviews")
 public class Review {
 
     @Id
