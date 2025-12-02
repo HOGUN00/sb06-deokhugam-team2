@@ -5,7 +5,6 @@ import com.codeit.sb06deokhugamteam2.book.entity.QBook;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,8 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
         List<Book> books = queryFactory.selectFrom(book)
                 .where(keywordContains(keyword),
                         getCursorCondition(cursor, orderBy, direction),
-                        getNextAfterCondition(nextAfter, direction))
+                        getNextAfterCondition(nextAfter, direction),
+                        book.deleted.isFalse())
                 .orderBy(primarySort, secondarySort)
                 .limit(limit + 1)
                 .fetch();

@@ -59,6 +59,10 @@ public class BookService {
     private String ocrApiKey;
 
     public BookDto create(BookCreateRequest bookCreateRequest, Optional<BookImageCreateRequest> optionalBookImageCreateRequest) {
+        if (bookRepository.findByIsbnAndDeletedFalse(bookCreateRequest.getIsbn()).isPresent()) {
+            throw new BookException(ErrorCode.DUPLICATE_BOOK, Map.of("isbn", bookCreateRequest.getIsbn()), HttpStatus.CONFLICT);
+        }
+
         Book book = Book.builder()
                 .isbn(bookCreateRequest.getIsbn())
                 .title(bookCreateRequest.getTitle())
@@ -93,6 +97,13 @@ public class BookService {
                         HttpStatus.NOT_FOUND
                 )
         );
+        if (findBook.isDeleted()) {
+            throw new BookException(
+                    ErrorCode.NO_ID_VARIABLE,
+                    Map.of("bookId", bookId),
+                    HttpStatus.NOT_FOUND
+            );
+        }
 
         String thumbnailUrl = optionalBookImageCreateRequest.map(bookImageCreateRequest -> {
             if (findBook.getThumbnailUrl() != null) {
@@ -105,9 +116,7 @@ public class BookService {
             return s3Storage.getThumbnail(newKey);
         }).orElseGet(() -> {
             if (findBook.getThumbnailUrl() != null) {
-                String url = findBook.getThumbnailUrl();
-                String oldKey = url.substring(url.lastIndexOf("/") + 1);
-                s3Storage.deleteThumbnail(oldKey);
+                return findBook.getThumbnailUrl();
             }
             return null;
         });
@@ -123,11 +132,12 @@ public class BookService {
 
         return bookMapper.toDto(findBook);
     }
+
     @Transactional(readOnly = true)
     public CursorPageResponseBookDto findBooks(String keyword, String orderBy,
                                                String direction, String cursor, Instant nextAfter, int limit) {
         long totalElements =
-                keyword == null ? bookRepository.count() : bookRepository.countByKeyword(keyword);
+                keyword == null ? bookRepository.countByDeletedFalse() : bookRepository.countNotDeletedBooksByKeyword(keyword);
 
         Slice<Book> bookSlice = bookRepository.findBooks(keyword, orderBy, direction, cursor, nextAfter, limit);
         Slice<BookDto> bookDtoSlice = bookSlice.map(bookMapper::toDto);
@@ -146,8 +156,12 @@ public class BookService {
 
     @Transactional(readOnly = true)
     public BookDto findBookById(UUID bookId) {
-        Book findBook = bookRepository.findById(bookId).orElseThrow(() -> new BookException(ErrorCode.NO_ID_VARIABLE,
-                Map.of("bookId", bookId), HttpStatus.NOT_FOUND));
+        Book findBook = bookRepository.findById(bookId).orElse(null);
+        if (findBook == null || findBook.isDeleted()) {
+            throw new BookException(ErrorCode.NO_ID_VARIABLE,
+                    Map.of("bookId", bookId), HttpStatus.NOT_FOUND);
+        }
+
         return bookMapper.toDto(findBook);
     }
 

@@ -6,6 +6,7 @@ import com.codeit.sb06deokhugamteam2.review.application.port.in.query.ReviewPagi
 import com.codeit.sb06deokhugamteam2.review.application.port.in.query.ReviewQuery;
 import com.codeit.sb06deokhugamteam2.review.domain.ReviewDomain;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ReviewRepository {
@@ -19,4 +20,8 @@ public interface ReviewRepository {
     ReviewSummary findReviewSummary(ReviewPaginationQuery query);
 
     ReviewDetail findReviewDetail(ReviewQuery query);
+
+    Optional<ReviewDomain> findById(UUID reviewId);
+
+    void delete(ReviewDomain review);
 }

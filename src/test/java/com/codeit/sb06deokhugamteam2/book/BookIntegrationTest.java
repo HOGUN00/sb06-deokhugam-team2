@@ -155,16 +155,7 @@ public class BookIntegrationTest {
     @Test
     @DisplayName("도서 수정 API 통합 테스트")
     void bookUpdate_Success() throws Exception {
-        Book book = Book.builder()
-                .isbn(ISBN)
-                .author(AUTHOR)
-                .description(DESCRIPTION)
-                .publishedDate(PUBLISHED_DATE.minusDays(1L))
-                .thumbnailUrl(THUMBNAIL_URL)
-                .publisher(PUBLISHER)
-                .title(TITLE)
-                .build();
-
+        Book book = BookFixture.createBook(1);
         Book savedBook = bookRepository.save(book);
         UUID targetBookId = savedBook.getId();
 

@@ -20,20 +20,6 @@ public class ReviewLikeId implements Serializable {
     @Column(name = "review_id", nullable = false)
     private UUID reviewId;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        ReviewLikeId entity = (ReviewLikeId) o;
-        return Objects.equals(this.userId, entity.userId) &&
-                Objects.equals(this.reviewId, entity.reviewId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(userId, reviewId);
-    }
-
     public ReviewLikeId userId(UUID userId) {
         this.userId = userId;
         return this;
@@ -50,5 +36,19 @@ public class ReviewLikeId implements Serializable {
 
     public UUID reviewId() {
         return reviewId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        ReviewLikeId entity = (ReviewLikeId) o;
+        return Objects.equals(this.userId, entity.userId) &&
+                Objects.equals(this.reviewId, entity.reviewId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, reviewId);
     }
 }

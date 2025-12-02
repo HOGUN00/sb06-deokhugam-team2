@@ -1,7 +1,7 @@
 package com.codeit.sb06deokhugamteam2.review;
 
-import com.codeit.sb06deokhugamteam2.review.adapter.out.entity.Review;
 import com.codeit.sb06deokhugamteam2.review.adapter.in.dto.ReviewCreateRequest;
+import com.codeit.sb06deokhugamteam2.review.adapter.out.entity.Review;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 @AutoConfigureMockMvc
 @AutoConfigureTestEntityManager
 @Transactional
-class ReviewControllerTest {
+class ReviewTest {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -67,7 +67,6 @@ class ReviewControllerTest {
                         softly.assertThat(saved.commentCount()).isEqualTo(0);
                         softly.assertThat(saved.createdAt()).isAfterOrEqualTo(now);
                         softly.assertThat(saved.updatedAt()).isEqualTo(saved.createdAt()).isAfterOrEqualTo(now);
-                        softly.assertThat(saved.deleted()).isFalse();
                     });
                 });
     }

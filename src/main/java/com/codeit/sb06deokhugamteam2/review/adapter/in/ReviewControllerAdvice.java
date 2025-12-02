@@ -1,9 +1,7 @@
 package com.codeit.sb06deokhugamteam2.review.adapter.in;
 
 import com.codeit.sb06deokhugamteam2.common.exception.ErrorResponse;
-import com.codeit.sb06deokhugamteam2.review.domain.exception.DuplicateReviewException;
-import com.codeit.sb06deokhugamteam2.review.domain.exception.ReviewBookNotFoundException;
-import com.codeit.sb06deokhugamteam2.review.domain.exception.ReviewUserNotFoundException;
+import com.codeit.sb06deokhugamteam2.review.domain.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,6 +26,7 @@ public class ReviewControllerAdvice {
                 .message("사용자를 찾을 수 없습니다.")
                 .details(Collections.emptyMap())
                 .exceptionType(e.getClass().getSuperclass().getSimpleName())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -41,6 +40,7 @@ public class ReviewControllerAdvice {
                 .message("도서를 찾을 수 없습니다.")
                 .details(Collections.emptyMap())
                 .exceptionType(e.getClass().getSuperclass().getSimpleName())
+                .status(HttpStatus.NOT_FOUND.value())
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
@@ -54,7 +54,36 @@ public class ReviewControllerAdvice {
                 .message("이미 작성한 리뷰가 있습니다.")
                 .details(Collections.emptyMap())
                 .exceptionType(e.getClass().getSuperclass().getSimpleName())
+                .status(HttpStatus.CONFLICT.value())
                 .build();
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(ReviewNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleReviewNotFoundException(ReviewNotFoundException e) {
+        log.error(e.getMessage());
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .code("REVIEW_NOT_FOUND")
+                .message("리뷰를 찾을 수 없습니다.")
+                .details(Collections.emptyMap())
+                .exceptionType(e.getClass().getSuperclass().getSimpleName())
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(ReviewPermissionDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleReviewPermissionDeniedException(ReviewPermissionDeniedException e) {
+        log.error(e.getMessage());
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .code("REVIEW_NOT_OWNED")
+                .message("본인이 작성한 리뷰만 수정/삭제할 수 있습니다.")
+                .details(Collections.emptyMap())
+                .exceptionType(e.getClass().getSuperclass().getSimpleName())
+                .status(HttpStatus.FORBIDDEN.value())
+                .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 }

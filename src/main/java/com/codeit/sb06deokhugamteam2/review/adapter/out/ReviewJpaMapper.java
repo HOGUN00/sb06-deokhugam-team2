@@ -24,43 +24,10 @@ public class ReviewJpaMapper {
                 .user(user)
                 .rating(snapshot.rating())
                 .content(snapshot.content())
-                .likeCount(snapshot.likeCount())
-                .commentCount(snapshot.commentCount())
+                .likeCount(0)
+                .commentCount(0)
                 .createdAt(snapshot.createdAt())
-                .updatedAt(snapshot.updatedAt())
-                .deleted(snapshot.deleted());
-    }
-
-    public ReviewDetail toReviewDetail(Review review) {
-        UUID id = review.id();
-        UUID bookId = review.book().getId();
-        String bookTitle = review.book().getTitle();
-        String bookThumbnailUrl = review.book().getThumbnailUrl();
-        UUID userId = review.user().getId();
-        String userNickname = review.user().getNickname();
-        String content = review.content();
-        Integer rating = review.rating();
-        Integer likeCount = review.likeCount();
-        Integer commentCount = review.commentCount();
-        Boolean likedByMe = review.likes().contains(userId);
-        Instant createdAt = review.createdAt();
-        Instant updatedAt = review.updatedAt();
-
-        return new ReviewDetail(
-                id,
-                bookId,
-                bookTitle,
-                bookThumbnailUrl,
-                userId,
-                userNickname,
-                content,
-                rating,
-                likeCount,
-                commentCount,
-                likedByMe,
-                createdAt,
-                updatedAt
-        );
+                .updatedAt(snapshot.updatedAt());
     }
 
     public ReviewSummary toReviewSummary(
@@ -90,5 +57,27 @@ public class ReviewJpaMapper {
             return nextReviewDetail.rating().toString();
         }
         return nextReviewDetail.createdAt().toString();
+    }
+
+    public ReviewDomain toReviewDomain(Review review) {
+        UUID id = review.id();
+        UUID bookId = review.book().getId();
+        UUID userId = review.user().getId();
+        Integer rating = review.rating();
+        String content = review.content();
+        Instant createdAt = review.createdAt();
+        Instant updatedAt = review.updatedAt();
+
+        var snapshot = new ReviewDomain.Snapshot(
+                id,
+                bookId,
+                userId,
+                rating,
+                content,
+                createdAt,
+                updatedAt
+        );
+
+        return ReviewDomain.loadSnapshot(snapshot);
     }
 }

@@ -9,11 +9,9 @@ import com.codeit.sb06deokhugamteam2.review.application.port.in.query.ReviewQuer
 import com.codeit.sb06deokhugamteam2.review.application.port.out.ReviewRepository;
 import com.codeit.sb06deokhugamteam2.review.domain.ReviewDomain;
 import com.codeit.sb06deokhugamteam2.user.entity.User;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
@@ -24,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.codeit.sb06deokhugamteam2.book.entity.QBook.book;
@@ -71,26 +70,19 @@ public class ReviewJpaRepository implements ReviewRepository {
 
     @Override
     public ReviewDetail findReviewDetailById(UUID reviewId) {
-        Review found = select(review)
+        return findReviewDetail(null, review.id.eq(reviewId)).fetchOne();
+    }
+
+    private JPAQuery<ReviewDetail> findReviewDetail(UUID requestUserId, Predicate... predicate) {
+        return select(reviewDetailProjection(requestUserId))
                 .from(review)
-                .innerJoin(review.book, book).fetchJoin()
-                .innerJoin(review.user, user).fetchJoin()
-                .innerJoin(review.likes, reviewLike).fetchJoin()
-                .where(review.id.eq(reviewId))
-                .fetchOne();
-
-        return reviewMapper.toReviewDetail(found);
+                .innerJoin(review.book, book)
+                .innerJoin(review.user, user)
+                .where(predicate);
     }
 
-    @Override
-    public ReviewSummary findReviewSummary(ReviewPaginationQuery query) {
-        List<ReviewDetail> reviewDetails = findReviewDetails(query);
-        Long totalElements = findTotalElements(query);
-        return reviewMapper.toReviewSummary(reviewDetails, totalElements, query);
-    }
-
-    private List<ReviewDetail> findReviewDetails(ReviewPaginationQuery query) {
-        return select(Projections.constructor(
+    private static Expression<ReviewDetail> reviewDetailProjection(UUID requestUserId) {
+        return Projections.constructor(
                 ReviewDetail.class,
                 review.id,
                 review.book.id,
@@ -102,40 +94,16 @@ public class ReviewJpaRepository implements ReviewRepository {
                 review.rating,
                 review.likeCount,
                 review.commentCount,
-                likedByMe(query.requestUserId()),
+                likedByMe(requestUserId),
                 review.createdAt,
                 review.updatedAt
-        ))
-                .from(review)
-                .innerJoin(review.book, book)
-                .innerJoin(review.user, user)
-                .where(
-                        bookIdEq(query.bookId()),
-                        userIdEq(query.userId()),
-                        keywordContains(query.keyword()),
-                        cursorExpressions(query),
-                        review.deleted.eq(false)
-                )
-                .orderBy(orderByExpressions(query))
-                .limit(query.limit() + 1)
-                .fetch();
-    }
-
-    private Long findTotalElements(ReviewPaginationQuery query) {
-        Long totalElements = select(review.count())
-                .from(review)
-                .where(
-                        userIdEq(query.userId()),
-                        bookIdEq(query.bookId()),
-                        keywordContains(query.keyword()),
-                        review.deleted.eq(false)
-                )
-                .fetchOne();
-
-        return totalElements == null ? 0L : totalElements;
+        );
     }
 
     private static BooleanExpression likedByMe(UUID requestUserId) {
+        if (requestUserId == null) {
+            return Expressions.FALSE;
+        }
         return JPAExpressions.selectOne()
                 .from(reviewLike)
                 .where(
@@ -143,6 +111,26 @@ public class ReviewJpaRepository implements ReviewRepository {
                         reviewLike.user.id.eq(requestUserId)
                 )
                 .exists();
+    }
+
+    @Override
+    public ReviewSummary findReviewSummary(ReviewPaginationQuery query) {
+        List<ReviewDetail> reviewDetails = findReviewDetails(query);
+        Long totalElements = findTotalElements(query);
+        return reviewMapper.toReviewSummary(reviewDetails, totalElements, query);
+    }
+
+    private List<ReviewDetail> findReviewDetails(ReviewPaginationQuery query) {
+        Predicate[] predicates = {
+                bookIdEq(query.bookId()),
+                userIdEq(query.userId()),
+                keywordContains(query.keyword()),
+                cursorExpressions(query)
+        };
+        return findReviewDetail(query.requestUserId(), predicates)
+                .orderBy(orderByExpressions(query))
+                .limit(query.limit() + 1)
+                .fetch();
     }
 
     private static BooleanExpression bookIdEq(UUID bookId) {
@@ -196,31 +184,35 @@ public class ReviewJpaRepository implements ReviewRepository {
         return orderSpecifiers.toArray(OrderSpecifier[]::new);
     }
 
-    @Override
-    public ReviewDetail findReviewDetail(ReviewQuery query) {
-        return select(Projections.constructor(
-                ReviewDetail.class,
-                review.id,
-                review.book.id,
-                book.title,
-                book.thumbnailUrl,
-                review.user.id,
-                user.nickname,
-                review.content,
-                review.rating,
-                review.likeCount,
-                review.commentCount,
-                likedByMe(query.requestUserId()),
-                review.createdAt,
-                review.updatedAt
-        ))
+    private Long findTotalElements(ReviewPaginationQuery query) {
+        Long totalElements = select(review.count())
                 .from(review)
-                .innerJoin(review.book, book)
-                .innerJoin(review.user, user)
                 .where(
-                        review.id.eq(query.reviewId()),
-                        review.deleted.eq(false)
+                        userIdEq(query.userId()),
+                        bookIdEq(query.bookId()),
+                        keywordContains(query.keyword())
                 )
                 .fetchOne();
+
+        return totalElements == null ? 0L : totalElements;
+    }
+
+    @Override
+    public ReviewDetail findReviewDetail(ReviewQuery query) {
+        return findReviewDetail(query.requestUserId(), review.id.eq(query.reviewId()))
+                .fetchOne();
+    }
+
+    @Override
+    public Optional<ReviewDomain> findById(UUID reviewId) {
+        Review found = em.find(Review.class, reviewId);
+        return Optional.ofNullable(found).map(reviewMapper::toReviewDomain);
+    }
+
+    @Override
+    @Transactional
+    public void delete(ReviewDomain review) {
+        Review deleteReview = em.getReference(Review.class, review.id());
+        em.remove(deleteReview);
     }
 }
