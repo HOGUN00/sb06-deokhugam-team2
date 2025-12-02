@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface BookRepository extends JpaRepository<Book, UUID>, BookRepositoryCustom {
@@ -20,5 +21,5 @@ public interface BookRepository extends JpaRepository<Book, UUID>, BookRepositor
 
     List<Book> findAllByCreatedAtAfter(Instant since);
 
-    boolean existsByIsbn(String isbn);
+    Optional<Book> findByIsbn(String isbn);
 }
