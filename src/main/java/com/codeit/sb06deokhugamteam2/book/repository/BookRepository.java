@@ -21,7 +21,7 @@ public interface BookRepository extends JpaRepository<Book, UUID>, BookRepositor
 //
 //    long countByDeletedFalse();
 //
-//    Optional<Book> findByIsbnAndDeletedFalse(String isbn);
+    Optional<Book> findByIsbn(String isbn);
 
     // 논리삭제하면 영속성 컨텍스트에서 제거하기 위해 clearAutomatically = true 설정
     // todo: soft delete 관련 테스트 코드 작성 필요

@@ -59,7 +59,7 @@ public class BookService {
     private String ocrApiKey;
 
     public BookDto create(BookCreateRequest bookCreateRequest, Optional<BookImageCreateRequest> optionalBookImageCreateRequest) {
-        if (bookRepository.findByIsbnAndDeletedFalse(bookCreateRequest.getIsbn()).isPresent()) {
+        if (bookRepository.findByIsbn(bookCreateRequest.getIsbn()).isPresent()) {
             throw new BookException(ErrorCode.DUPLICATE_BOOK, Map.of("isbn", bookCreateRequest.getIsbn()), HttpStatus.CONFLICT);
         }
 
