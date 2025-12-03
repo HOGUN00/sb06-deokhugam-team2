@@ -5,18 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.Range;
-import org.hibernate.validator.constraints.UUID;
 
-@Schema(description = "리뷰 등록")
-public record ReviewCreateRequest(
-        @Schema(format = "uuid")
-        @NotNull(message = "도서 ID는 필수입니다.") @UUID(message = "도서 ID는 UUID 형식이어야 합니다.")
-        String bookId,
-
-        @Schema(format = "uuid")
-        @NotNull(message = "사용자 ID는 필수입니다.") @UUID(message = "사용자 ID는 UUID 형식이어야 합니다.")
-        String userId,
-
+@Schema(description = "수정할 리뷰 정보")
+public record ReviewUpdateRequest(
         @NotBlank(message = "리뷰 내용은 필수입니다.")
         @Size(min = 1, max = 500, message = "리뷰 내용은 1자 이상 500자 이하여야 합니다.")
         String content,

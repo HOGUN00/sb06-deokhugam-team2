@@ -5,5 +5,5 @@ import com.codeit.sb06deokhugamteam2.review.application.dto.ReviewDto;
 
 public interface CreateReviewUseCase {
 
-    ReviewDto createReview(ReviewCreateRequest request);
+    ReviewDto createReview(ReviewCreateRequest requestBody);
 }

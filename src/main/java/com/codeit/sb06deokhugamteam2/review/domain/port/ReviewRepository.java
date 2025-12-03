@@ -1,4 +1,4 @@
-package com.codeit.sb06deokhugamteam2.review.domain.repository;
+package com.codeit.sb06deokhugamteam2.review.domain.port;
 
 import com.codeit.sb06deokhugamteam2.review.domain.ReviewDomain;
 
@@ -9,7 +9,7 @@ public interface ReviewRepository {
 
     boolean existsByBookIdAndUserId(UUID bookId, UUID userId);
 
-    void addReview(ReviewDomain review);
+    void save(ReviewDomain review);
 
     Optional<ReviewDomain> findById(UUID reviewId);
 
@@ -18,4 +18,6 @@ public interface ReviewRepository {
     Optional<ReviewDomain> findByIdWithoutDeleted(UUID reviewId);
 
     void hardDelete(ReviewDomain review);
+
+    void update(ReviewDomain review);
 }

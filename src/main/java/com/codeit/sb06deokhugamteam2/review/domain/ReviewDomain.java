@@ -1,6 +1,5 @@
 package com.codeit.sb06deokhugamteam2.review.domain;
 
-import com.codeit.sb06deokhugamteam2.review.domain.exception.ReviewException;
 import com.codeit.sb06deokhugamteam2.review.domain.exception.ReviewPermissionDeniedException;
 
 import java.time.Instant;
@@ -11,8 +10,8 @@ public class ReviewDomain {
     private final UUID id;
     private final UUID bookId;
     private final UUID userId;
-    private int rating;
-    private String content;
+    private ReviewRating rating;
+    private ReviewContent content;
     private int likeCount;
     private int commentCount;
     private final Instant createdAt;
@@ -22,94 +21,28 @@ public class ReviewDomain {
             UUID id,
             UUID bookId,
             UUID userId,
-            Integer rating,
-            String content,
-            Integer likeCount,
-            Integer commentCount,
+            ReviewRating rating,
+            ReviewContent content,
+            int likeCount,
+            int commentCount,
             Instant createdAt,
             Instant updatedAt
     ) {
-        this.id = requiredId(id);
-        this.bookId = requiredBookId(bookId);
-        this.userId = requiredUserId(userId);
-        this.rating = requiredRating(rating);
-        this.content = requiredContent(content);
-        this.likeCount = requiredLikeCount(likeCount);
-        this.commentCount = requiredCommentCount(commentCount);
-        this.createdAt = requiredCreatedAt(createdAt);
-        this.updatedAt = requiredUpdatedAt(updatedAt);
+        this.id = id;
+        this.bookId = bookId;
+        this.userId = userId;
+        this.rating = rating;
+        this.content = content;
+        this.likeCount = likeCount;
+        this.commentCount = commentCount;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    private UUID requiredId(UUID id) {
-        if (id == null) {
-            throw new ReviewException("id is required");
-        }
-        return id;
-    }
-
-    private UUID requiredBookId(UUID bookId) {
-        if (bookId == null) {
-            throw new ReviewException("bookId is required");
-        }
-        return bookId;
-    }
-
-    private UUID requiredUserId(UUID userId) {
-        if (userId == null) {
-            throw new ReviewException("userId is required");
-        }
-        return userId;
-    }
-
-    private int requiredRating(Integer rating) {
-        if (rating == null) {
-            throw new ReviewException("rating is required");
-        }
-        if (rating < 1 || rating > 5) {
-            throw new ReviewException("rating must be between 1 and 5");
-        }
-        return rating;
-    }
-
-    private String requiredContent(String content) {
-        if (content == null || content.isBlank()) {
-            throw new ReviewException("content is required");
-        }
-        return content;
-    }
-
-    private int requiredLikeCount(Integer likeCount) {
-        if (likeCount == null) {
-            throw new ReviewException("likeCount is required");
-        }
-        return likeCount;
-    }
-
-    private int requiredCommentCount(Integer commentCount) {
-        if (commentCount == null) {
-            throw new ReviewException("commentCount is required");
-        }
-        return commentCount;
-    }
-
-    private Instant requiredCreatedAt(Instant createdAt) {
-        if (createdAt == null) {
-            throw new ReviewException("createdAt is required");
-        }
-        return createdAt;
-    }
-
-    private Instant requiredUpdatedAt(Instant updatedAt) {
-        if (updatedAt == null) {
-            throw new ReviewException("updatedAt is required");
-        }
-        return updatedAt;
-    }
-
-    public static ReviewDomain create(UUID bookId, UUID userId, Integer rating, String content) {
+    public static ReviewDomain write(UUID bookId, UUID userId, ReviewRating rating, ReviewContent content) {
         UUID id = UUID.randomUUID();
-        Integer likeCount = 0;
-        Integer commentCount = 0;
+        int likeCount = 0;
+        int commentCount = 0;
         Instant createdAt = Instant.now();
         Instant updatedAt = createdAt;
 
@@ -130,10 +63,10 @@ public class ReviewDomain {
         UUID id = snapshot.id();
         UUID bookId = snapshot.bookId();
         UUID userId = snapshot.userId();
-        Integer rating = snapshot.rating();
-        String content = snapshot.content();
-        Integer likeCount = snapshot.likeCount();
-        Integer commentCount = snapshot.commentCount();
+        ReviewRating rating = snapshot.rating();
+        ReviewContent content = snapshot.content();
+        int likeCount = snapshot.likeCount();
+        int commentCount = snapshot.commentCount();
         Instant createdAt = snapshot.createdAt();
         Instant updatedAt = snapshot.updatedAt();
 
@@ -164,6 +97,20 @@ public class ReviewDomain {
         );
     }
 
+    public ReviewDomain verifyOwner(UUID requestUserId) {
+        if (!userId.equals(requestUserId)) {
+            throw new ReviewPermissionDeniedException(requestUserId);
+        }
+        return this;
+    }
+
+    public ReviewDomain edit(ReviewRating rating, ReviewContent content) {
+        this.rating = rating;
+        this.content = content;
+        this.updatedAt = Instant.now();
+        return this;
+    }
+
     public UUID id() {
         return id;
     }
@@ -176,25 +123,18 @@ public class ReviewDomain {
         return userId;
     }
 
-    public int rating() {
+    public ReviewRating rating() {
         return rating;
-    }
-
-    public UUID requireOwner(UUID requestUserId) {
-        if (!userId.equals(requestUserId)) {
-            throw new ReviewPermissionDeniedException(requestUserId);
-        }
-        return requestUserId;
     }
 
     public record Snapshot(
             UUID id,
             UUID bookId,
             UUID userId,
-            Integer rating,
-            String content,
-            Integer likeCount,
-            Integer commentCount,
+            ReviewRating rating,
+            ReviewContent content,
+            int likeCount,
+            int commentCount,
             Instant createdAt,
             Instant updatedAt
     ) {

@@ -1,21 +1,23 @@
 package com.codeit.sb06deokhugamteam2.review.adapter.out;
 
 import com.codeit.sb06deokhugamteam2.review.adapter.out.entity.Review;
+import com.codeit.sb06deokhugamteam2.review.domain.ReviewContent;
 import com.codeit.sb06deokhugamteam2.review.domain.ReviewDomain;
+import com.codeit.sb06deokhugamteam2.review.domain.ReviewRating;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Component
-public class ReviewJpaMapper {
+public class ReviewMapper {
 
     public Review toReview(ReviewDomain review) {
         ReviewDomain.Snapshot snapshot = review.createSnapshot();
 
         return new Review().id(snapshot.id())
-                .rating(snapshot.rating())
-                .content(snapshot.content())
+                .rating(snapshot.rating().value())
+                .content(snapshot.content().value())
                 .likeCount(snapshot.likeCount())
                 .commentCount(snapshot.commentCount())
                 .createdAt(snapshot.createdAt())
@@ -26,10 +28,10 @@ public class ReviewJpaMapper {
         UUID id = review.id();
         UUID bookId = review.book().getId();
         UUID userId = review.user().getId();
-        Integer rating = review.rating();
-        String content = review.content();
-        Integer likeCount = review.likeCount();
-        Integer commentCount = review.commentCount();
+        var rating = new ReviewRating(review.rating());
+        var content = new ReviewContent(review.content());
+        int likeCount = review.likeCount();
+        int commentCount = review.commentCount();
         Instant createdAt = review.createdAt();
         Instant updatedAt = review.updatedAt();
 

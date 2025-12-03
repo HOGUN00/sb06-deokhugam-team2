@@ -6,7 +6,7 @@ import com.codeit.sb06deokhugamteam2.review.application.dto.ReviewDto;
 
 public interface GetReviewQuery {
 
-    CursorPageResponseReviewDto readReviews(CursorPageRequestReviewDto request, String header);
+    CursorPageResponseReviewDto readReviews(CursorPageRequestReviewDto query, String header);
 
-    ReviewDto readReview(String request, String header);
+    ReviewDto readReview(String path, String header);
 }

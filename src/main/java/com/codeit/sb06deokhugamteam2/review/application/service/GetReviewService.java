@@ -22,15 +22,17 @@ public class GetReviewService implements GetReviewQuery {
     }
 
     @Override
-    public CursorPageResponseReviewDto readReviews(CursorPageRequestReviewDto request, String header) {
+    public CursorPageResponseReviewDto readReviews(CursorPageRequestReviewDto query, String header) {
         UUID requestUserId = UUID.fromString(header);
-        return queryReviewPort.findAll(request, requestUserId);
+
+        return queryReviewPort.findAll(query, requestUserId);
     }
 
     @Override
-    public ReviewDto readReview(String request, String header) {
-        UUID reviewId = UUID.fromString(request);
+    public ReviewDto readReview(String path, String header) {
+        UUID reviewId = UUID.fromString(path);
         UUID requestUserId = UUID.fromString(header);
+
         return queryReviewPort.findById(reviewId, requestUserId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
     }

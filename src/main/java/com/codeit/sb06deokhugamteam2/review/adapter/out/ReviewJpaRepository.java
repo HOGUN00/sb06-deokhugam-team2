@@ -8,7 +8,7 @@ import com.codeit.sb06deokhugamteam2.review.application.dto.CursorPageResponseRe
 import com.codeit.sb06deokhugamteam2.review.application.dto.ReviewDto;
 import com.codeit.sb06deokhugamteam2.review.application.port.out.QueryReviewPort;
 import com.codeit.sb06deokhugamteam2.review.domain.ReviewDomain;
-import com.codeit.sb06deokhugamteam2.review.domain.repository.ReviewRepository;
+import com.codeit.sb06deokhugamteam2.review.domain.port.ReviewRepository;
 import com.codeit.sb06deokhugamteam2.user.entity.User;
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -39,9 +39,9 @@ public class ReviewJpaRepository implements ReviewRepository, QueryReviewPort {
     @PersistenceContext
     private EntityManager em;
 
-    private final ReviewJpaMapper reviewMapper;
+    private final ReviewMapper reviewMapper;
 
-    public ReviewJpaRepository(ReviewJpaMapper reviewMapper) {
+    public ReviewJpaRepository(ReviewMapper reviewMapper) {
         this.reviewMapper = reviewMapper;
     }
 
@@ -51,30 +51,30 @@ public class ReviewJpaRepository implements ReviewRepository, QueryReviewPort {
 
     @Override
     public boolean existsByBookIdAndUserId(UUID bookId, UUID userId) {
-        Review found = select(review)
+        Review reviewEntity = select(review)
                 .from(review)
                 .innerJoin(review.book, book)
                 .innerJoin(review.user, user)
                 .where(review.book.id.eq(bookId), review.user.id.eq(userId))
                 .fetchFirst();
 
-        return found != null;
+        return reviewEntity != null;
     }
 
     @Override
     @Transactional
-    public void addReview(ReviewDomain review) {
-        Review newReview = reviewMapper.toReview(review);
+    public void save(ReviewDomain review) {
+        Review reviewEntity = reviewMapper.toReview(review);
         Book book = em.getReference(Book.class, review.bookId());
         User user = em.getReference(User.class, review.userId());
-        newReview = newReview.book(book).user(user);
-        em.persist(newReview);
+        reviewEntity = reviewEntity.book(book).user(user);
+        em.persist(reviewEntity);
     }
 
     @Override
     public Optional<ReviewDto> findById(UUID reviewId, UUID requestUserId) {
-        ReviewDto review = findById(requestUserId, QReview.review.id.eq(reviewId));
-        return Optional.ofNullable(review);
+        ReviewDto reviewDto = findById(requestUserId, QReview.review.id.eq(reviewId));
+        return Optional.ofNullable(reviewDto);
     }
 
     private ReviewDto findById(UUID requestUserId, Predicate... predicates) {
@@ -300,25 +300,25 @@ public class ReviewJpaRepository implements ReviewRepository, QueryReviewPort {
 
     @Override
     public Optional<ReviewDomain> findById(UUID reviewId) {
-        Review found = em.find(Review.class, reviewId);
-        return Optional.ofNullable(found).map(reviewMapper::toReviewDomain);
+        Review reviewEntity = em.find(Review.class, reviewId);
+        return Optional.ofNullable(reviewEntity).map(reviewMapper::toReviewDomain);
     }
 
     @Override
     @Transactional
     public void delete(ReviewDomain review) {
-        Review deleteReview = em.getReference(Review.class, review.id());
-        em.remove(deleteReview);
+        Review reviewEntity = em.getReference(Review.class, review.id());
+        em.remove(reviewEntity);
     }
 
     @Override
     public Optional<ReviewDomain> findByIdWithoutDeleted(UUID reviewId) {
         String sql = "SELECT * FROM reviews r WHERE r.id = :reviewId";
-        Review found = em.unwrap(Session.class)
+        Review reviewEntity = em.unwrap(Session.class)
                 .createNativeQuery(sql, Review.class)
                 .setParameter("reviewId", reviewId)
                 .getSingleResult();
-        return Optional.ofNullable(found).map(reviewMapper::toReviewDomain);
+        return Optional.ofNullable(reviewEntity).map(reviewMapper::toReviewDomain);
     }
 
     @Override
@@ -327,5 +327,14 @@ public class ReviewJpaRepository implements ReviewRepository, QueryReviewPort {
         em.createNativeQuery("DELETE FROM reviews r WHERE r.id = :reviewId")
                 .setParameter("reviewId", review.id())
                 .executeUpdate();
+    }
+
+    @Override
+    @Transactional
+    public void update(ReviewDomain review) {
+        ReviewDomain.Snapshot snapshot = review.createSnapshot();
+        Review reviewEntity = em.find(Review.class, snapshot.id());
+        reviewEntity.rating(snapshot.rating().value())
+                .content(snapshot.content().value());
     }
 }
