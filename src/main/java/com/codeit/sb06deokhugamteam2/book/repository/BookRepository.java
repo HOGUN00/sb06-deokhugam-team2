@@ -9,18 +9,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface BookRepository extends JpaRepository<Book, UUID>, BookRepositoryCustom {
-//    @Query("""
-//                SELECT COUNT(*)
-//                FROM Book b
-//                WHERE (LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-//                LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-//                LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND
-//                b.deleted = false
-//            """)
-//    long countNotDeletedBooksByKeyword(String keyword);
-//
-//    long countByDeletedFalse();
-//
+    @Query("""
+                SELECT COUNT(*)
+                FROM Book b
+                WHERE
+                    (LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+                    LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+                    LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            """)
+    long countBooksByKeyword(String keyword);
+
     Optional<Book> findByIsbn(String isbn);
 
     // 논리삭제하면 영속성 컨텍스트에서 제거하기 위해 clearAutomatically = true 설정

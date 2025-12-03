@@ -135,7 +135,7 @@ public class BookService {
     public CursorPageResponseBookDto findBooks(String keyword, String orderBy,
                                                String direction, String cursor, Instant nextAfter, int limit) {
         long totalElements =
-                keyword == null ? bookRepository.countByDeletedFalse() : bookRepository.countNotDeletedBooksByKeyword(keyword);
+                keyword == null ? bookRepository.count() : bookRepository.countBooksByKeyword(keyword);
 
         Slice<Book> bookSlice = bookRepository.findBooks(keyword, orderBy, direction, cursor, nextAfter, limit);
         Slice<BookDto> bookDtoSlice = bookSlice.map(bookMapper::toDto);
