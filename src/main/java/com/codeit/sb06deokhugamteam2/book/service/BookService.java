@@ -10,6 +10,7 @@ import com.codeit.sb06deokhugamteam2.book.dto.response.CursorPageResponseBookDto
 import com.codeit.sb06deokhugamteam2.book.dto.response.CursorPageResponsePopularBookDto;
 import com.codeit.sb06deokhugamteam2.book.dto.response.NaverBookDto;
 import com.codeit.sb06deokhugamteam2.book.entity.Book;
+import com.codeit.sb06deokhugamteam2.book.entity.BookStats;
 import com.codeit.sb06deokhugamteam2.book.mapper.BookCursorMapper;
 import com.codeit.sb06deokhugamteam2.book.mapper.BookMapper;
 import com.codeit.sb06deokhugamteam2.book.repository.BookRepository;
@@ -72,7 +73,12 @@ public class BookService {
                 .publishedDate(bookCreateRequest.getPublishedDate())
                 .build();
 
+        BookStats bookStats = new BookStats();
+        bookStats.setBook(book);
+        book.setBookStats(bookStats);
         Book savedBook = bookRepository.save(book);
+
+
         String thumbnailUrl = optionalBookImageCreateRequest.map(bookImageCreateRequest -> {
                     String key = savedBook.getId().toString() + "-" + bookImageCreateRequest.getOriginalFilename();
                     s3Storage.putThumbnail(key, bookImageCreateRequest.getBytes(), bookImageCreateRequest.getContentType());
