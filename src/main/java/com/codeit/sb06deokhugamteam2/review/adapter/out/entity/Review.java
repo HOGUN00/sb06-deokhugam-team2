@@ -29,10 +29,7 @@ public class Review {
     private User user;
 
     @NotNull
-    @OneToOne(
-            mappedBy = "review",
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-    )
+    @OneToOne(mappedBy = "review", cascade = CascadeType.ALL)
     private ReviewStat reviewStat;
 
     @NotNull

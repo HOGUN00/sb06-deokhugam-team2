@@ -5,8 +5,8 @@ import com.codeit.sb06deokhugamteam2.review.adapter.out.entity.Review;
 import com.codeit.sb06deokhugamteam2.review.adapter.out.mapper.ReviewJpaMapper;
 import com.codeit.sb06deokhugamteam2.review.application.dto.request.CursorPageRequestReviewDto;
 import com.codeit.sb06deokhugamteam2.review.application.dto.response.ReviewDto;
-import com.codeit.sb06deokhugamteam2.review.application.port.out.LoadReviewRepositoryPort;
-import com.codeit.sb06deokhugamteam2.review.application.port.out.SaveReviewRepositoryPort;
+import com.codeit.sb06deokhugamteam2.review.application.port.out.LoadReviewPort;
+import com.codeit.sb06deokhugamteam2.review.application.port.out.SaveReviewPort;
 import com.codeit.sb06deokhugamteam2.review.domain.model.ReviewDomain;
 import com.codeit.sb06deokhugamteam2.user.entity.User;
 import com.querydsl.core.types.*;
@@ -33,14 +33,14 @@ import static com.codeit.sb06deokhugamteam2.review.adapter.out.entity.QReviewSta
 import static com.codeit.sb06deokhugamteam2.user.entity.QUser.user;
 
 @Repository
-public class ReviewJpaRepositoryAdapter implements LoadReviewRepositoryPort, SaveReviewRepositoryPort {
+public class ReviewJpaRepository implements LoadReviewPort, SaveReviewPort {
 
     @PersistenceContext
     private EntityManager em;
 
     private final ReviewJpaMapper reviewMapper;
 
-    public ReviewJpaRepositoryAdapter(ReviewJpaMapper reviewMapper) {
+    public ReviewJpaRepository(ReviewJpaMapper reviewMapper) {
         this.reviewMapper = reviewMapper;
     }
 
@@ -124,7 +124,7 @@ public class ReviewJpaRepositoryAdapter implements LoadReviewRepositoryPort, Sav
         String cursor = request.cursor();
         Instant after = request.after();
         String direction = request.direction();
-        int limit = request.limit();
+        Integer limit = request.limit();
 
         return findAll(
                 bookId,
@@ -147,7 +147,7 @@ public class ReviewJpaRepositoryAdapter implements LoadReviewRepositoryPort, Sav
             String cursor,
             Instant after,
             String direction,
-            int limit,
+            Integer limit,
             UUID requestUserId
     ) {
         Predicate[] predicates = {
@@ -164,7 +164,7 @@ public class ReviewJpaRepositoryAdapter implements LoadReviewRepositoryPort, Sav
             Predicate[] predicates,
             String orderBy,
             String direction,
-            int limit
+            Integer limit
     ) {
         return select(reviewDtoProjection(requestUserId))
                 .from(review)
@@ -242,54 +242,43 @@ public class ReviewJpaRepositoryAdapter implements LoadReviewRepositoryPort, Sav
     }
 
     @Override
-    public Optional<ReviewDomain> findById(UUID reviewId) {
+    public Optional<ReviewDomain.Snapshot> findById(UUID reviewId) {
         Review reviewEntity = select(review)
                 .from(review)
                 .innerJoin(review.reviewStat, reviewStat).fetchJoin()
                 .where(review.id.eq(reviewId))
                 .fetchOne();
         return Optional.ofNullable(reviewEntity)
-                .map(reviewMapper::toDomainSnapshot)
-                .map(ReviewDomain::from);
+                .map(reviewMapper::toDomainSnapshot);
     }
 
     @Override
     public void softDelete(UUID reviewId) {
         Review reviewEntity = em.find(Review.class, reviewId);
         reviewEntity.deleted(Boolean.TRUE);
-        em.remove(reviewEntity);
     }
 
     @Override
-    public Optional<ReviewDomain> findByIdWithoutDeleted(UUID reviewId) {
+    public Optional<ReviewDomain.Snapshot> findByIdWithoutDeleted(UUID reviewId) {
         Review reviewEntity = em.unwrap(Session.class)
                 .createNativeQuery("""
-                        SELECT {r.*}, {rs.*}
+                        SELECT r.*, rs.*
                         FROM reviews r
                         INNER JOIN review_stats rs ON r.id = rs.review_id
                         WHERE r.id = :reviewId
                         """, Review.class)
+                .addEntity("r", Review.class)
+                .addJoin("rs", "r.reviewStat")
                 .setParameter("reviewId", reviewId)
                 .getSingleResult();
         return Optional.ofNullable(reviewEntity)
-                .map(reviewMapper::toDomainSnapshot)
-                .map(ReviewDomain::from);
+                .map(reviewMapper::toDomainSnapshot);
     }
 
     @Override
     public void hardDelete(UUID reviewId) {
-        em.createNativeQuery("""
-                        DELETE FROM review_stats
-                        WHERE review_id = :reviewId
-                        """)
-                .setParameter("reviewId", reviewId)
-                .executeUpdate();
-        em.createNativeQuery("""
-                        DELETE FROM reviews
-                        WHERE id = :reviewId
-                        """)
-                .setParameter("reviewId", reviewId)
-                .executeUpdate();
+        Review reviewEntity = em.getReference(Review.class, reviewId);
+        em.remove(reviewEntity);
     }
 
     @Override
@@ -302,7 +291,7 @@ public class ReviewJpaRepositoryAdapter implements LoadReviewRepositoryPort, Sav
     }
 
     @Override
-    public Optional<ReviewDomain> findByIdForUpdate(UUID reviewId) {
+    public Optional<ReviewDomain.Snapshot> findByIdForUpdate(UUID reviewId) {
         Review reviewEntity = select(review)
                 .from(review)
                 .innerJoin(review.reviewStat, reviewStat).fetchJoin()
@@ -310,7 +299,6 @@ public class ReviewJpaRepositoryAdapter implements LoadReviewRepositoryPort, Sav
                 .setLockMode(LockModeType.PESSIMISTIC_WRITE)
                 .fetchOne();
         return Optional.ofNullable(reviewEntity)
-                .map(reviewMapper::toDomainSnapshot)
-                .map(ReviewDomain::from);
+                .map(reviewMapper::toDomainSnapshot);
     }
 }
