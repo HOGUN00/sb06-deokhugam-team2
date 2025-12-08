@@ -39,6 +39,8 @@ public class UserService {
     private final UserQueryRepository userQueryRepository;
     private final UserMapper userMapper;
     private final Validator validator;
+    // private final ReviewRepository reviewRepository;
+    // private final CommentRepository commentRepository;
 
     @Transactional
     public UserDto register(UserRegisterRequest request) {
@@ -84,12 +86,14 @@ public class UserService {
     @Transactional
     public void softDeleteUser(UUID userId) {
 
-        if (!userRepository.existsById(userId)) {
-            throw new BasicException(ErrorCode.USER_NOT_FOUND,
-                    Collections.emptyMap(), HttpStatus.NOT_FOUND);
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BasicException(ErrorCode.USER_NOT_FOUND,
+                        Collections.emptyMap(), HttpStatus.NOT_FOUND));
 
-        userRepository.deleteById(userId);
+//        reviewRepository.softDeleteAllByUserId(userId);
+//        commentRepository.softDeleteAllByUserId(userId);
+
+        userRepository.delete(user);
     }
 
     @Transactional
