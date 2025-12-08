@@ -22,6 +22,7 @@ import com.codeit.sb06deokhugamteam2.common.exception.exceptions.BookException;
 import com.codeit.sb06deokhugamteam2.common.exception.exceptions.OcrException;
 import com.codeit.sb06deokhugamteam2.dashboard.entity.Dashboard;
 import com.codeit.sb06deokhugamteam2.dashboard.repository.DashboardRepository;
+import com.codeit.sb06deokhugamteam2.review.adapter.out.entity.Review;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -170,6 +174,17 @@ public class BookService {
 
         List<PopularBookDto> popularBookDtoList = new ArrayList<>();
 
+        LocalDateTime since = null;
+
+        switch (period) {
+            case DAILY -> since = LocalDate.now().atStartOfDay().minusDays(1);
+            case WEEKLY -> since = LocalDate.now().atStartOfDay().minusDays(7);
+            case MONTHLY -> since = LocalDate.now().atStartOfDay().minusMonths(1);
+            case ALL_TIME -> since = LocalDateTime.MIN;
+        }
+
+        LocalDateTime finalSince = since;
+
         bookDashboard.forEach(dashboard -> {
             Book book = bookRepository.findById(dashboard.getEntityId())
                     .orElseThrow(() -> new BookException(
@@ -177,14 +192,30 @@ public class BookService {
                             Map.of("bookId", dashboard.getEntityId()),
                             HttpStatus.NOT_FOUND)
                     );
-            BookStats bookStats = book.getBookStats();
+
+            List<Review> periodReviews = book.getReviews().stream().filter(review ->
+                    // 같거나 이후
+                    !review.createdAt().isBefore(finalSince.toInstant(ZoneOffset.UTC))
+            ).toList();
+
+            long reviewCount = periodReviews.size();
+
+            if(reviewCount==0){
+                return;
+            }
+
+            double rating = periodReviews.stream()
+                    .mapToDouble(Review::rating)
+                    .sum() / reviewCount;
+
             popularBookDtoList.add(
-                    bookMapper.toDto(dashboard, book, bookStats, period)
+                    bookMapper.toDto(dashboard, book, period, reviewCount, rating)
             );
         });
 
         return bookCursorMapper.toCursorBookDto(popularBookDtoList, limit);
     }
+
 
     @Transactional(readOnly = true)
     public String getIsbnByOcrApi(MultipartFile image) {
