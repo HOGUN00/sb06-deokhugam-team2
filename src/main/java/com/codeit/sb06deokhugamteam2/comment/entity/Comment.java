@@ -38,6 +38,9 @@ public class Comment {
     @Column(nullable = false)
     private String content;
 
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
     @Column(nullable = false,name = "created_at", updatable = false)
     @CreatedDate
     private Instant createdAt;
@@ -45,9 +48,6 @@ public class Comment {
     @Column(nullable = false, name = "updated_at")
     @LastModifiedDate
     private Instant updatedAt;
-
-    @Column(nullable = false)
-    private boolean deleted;
 
     @Builder
     public Comment(User user, Review review, String content) {

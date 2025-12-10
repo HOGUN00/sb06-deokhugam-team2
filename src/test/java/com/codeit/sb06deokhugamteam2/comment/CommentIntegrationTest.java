@@ -1,5 +1,7 @@
 package com.codeit.sb06deokhugamteam2.comment;
 
+import com.codeit.sb06deokhugamteam2.book.entity.Book;
+import com.codeit.sb06deokhugamteam2.book.entity.BookStats;
 import com.codeit.sb06deokhugamteam2.comment.dto.CommentCreateRequest;
 import com.codeit.sb06deokhugamteam2.comment.dto.CommentDto;
 import com.codeit.sb06deokhugamteam2.comment.dto.CommentUpdateRequest;
@@ -25,6 +27,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -67,13 +70,37 @@ public class CommentIntegrationTest {
 
         userRepository.saveAndFlush(user);
 
+        //도서 생성 및 저장
+        Book book = Book.builder()
+                .title("test title")
+                .author("test author")
+                .description("test description")
+                .publisher("test publisher")
+                .publishedDate(LocalDate.now())
+                .isbn("1111111111")
+                .thumbnailUrl("test")
+                .build();
+
+        em.persist(book);
+
+        BookStats bookStats = BookStats.builder()
+                .book(book)
+                .reviewCount(0)
+                .ratingSum(0)
+                .build();
+
+        book.setBookStats(bookStats);
+        em.persist(bookStats);
+
+        em.flush();
+
         //리뷰 생성 및 저장
 
         UUID reviewId = UUID.randomUUID();
 
         Review review = new Review()
                 .id(reviewId)
-                .book(null)
+                .book(book)
                 .user(user)
                 .rating(5)
                 .content("review content")
@@ -123,9 +150,12 @@ public class CommentIntegrationTest {
         assertThat(all).hasSize(1);
 
         Comment saved = all.get(0);
-        assertThat(saved.getContent()).isEqualTo("댓글 내용 테스트");
+        assertThat(saved.getContent()).isEqualTo("댓글 등록 테스트");
         assertThat(saved.getUser().getId()).isEqualTo(user.getId());
         assertThat(saved.getReview().id()).isEqualTo(reviewId);
+
+        ReviewStat reviewStat = em.find(ReviewStat.class, reviewId);
+        assertThat(reviewStat.commentCount()).isEqualTo(1);
     }
 
     @Test
@@ -140,12 +170,36 @@ public class CommentIntegrationTest {
                 .build();
         userRepository.saveAndFlush(user);
 
+        //도서 생성 및 저장
+        Book book = Book.builder()
+                .title("test title")
+                .author("test author")
+                .description("test description")
+                .publisher("test publisher")
+                .publishedDate(LocalDate.now())
+                .isbn("1111111111")
+                .thumbnailUrl("test")
+                .build();
+
+        em.persist(book);
+
+        BookStats bookStats = BookStats.builder()
+                .book(book)
+                .reviewCount(0)
+                .ratingSum(0)
+                .build();
+
+        book.setBookStats(bookStats);
+        em.persist(bookStats);
+
+        em.flush();
+
         //리뷰 생성
         UUID reviewId = UUID.randomUUID();
 
         Review review = new Review()
                 .id(reviewId)
-                .book(null)
+                .book(book)
                 .user(user)
                 .rating(5)
                 .content("review content")
@@ -215,12 +269,36 @@ public class CommentIntegrationTest {
                 .build();
         userRepository.saveAndFlush(user);
 
+        //도서 생성 및 저장
+        Book book = Book.builder()
+                .title("test title")
+                .author("test author")
+                .description("test description")
+                .publisher("test publisher")
+                .publishedDate(LocalDate.now())
+                .isbn("1111111111")
+                .thumbnailUrl("test")
+                .build();
+
+        em.persist(book);
+
+        BookStats bookStats = BookStats.builder()
+                .book(book)
+                .reviewCount(0)
+                .ratingSum(0)
+                .build();
+
+        book.setBookStats(bookStats);
+        em.persist(bookStats);
+
+        em.flush();
+
         //리뷰 생성
         UUID reviewId = UUID.randomUUID();
 
         Review review = new Review()
                 .id(reviewId)
-                .book(null)
+                .book(book)
                 .user(user)
                 .rating(5)
                 .content("review content")
@@ -287,12 +365,37 @@ public class CommentIntegrationTest {
                 .build();
         userRepository.saveAndFlush(user);
 
+        //도서 생성 및 저장
+        Book book = Book.builder()
+                .title("test title")
+                .author("test author")
+                .description("test description")
+                .publisher("test publisher")
+                .publishedDate(LocalDate.now())
+                .isbn("1111111111")
+                .thumbnailUrl("test")
+                .build();
+
+        em.persist(book);
+
+        BookStats bookStats = BookStats.builder()
+                .book(book)
+                .reviewCount(0)
+                .ratingSum(0)
+                .build();
+
+        book.setBookStats(bookStats);
+        em.persist(bookStats);
+
+        em.flush();
+
+
         //리뷰 생성
         UUID reviewId = UUID.randomUUID();
 
         Review review = new Review()
                 .id(reviewId)
-                .book(null)
+                .book(book)
                 .user(user)
                 .rating(5)
                 .content("review content")
@@ -379,12 +482,36 @@ public class CommentIntegrationTest {
                 .build();
         userRepository.saveAndFlush(user);
 
+        //도서 생성 및 저장
+        Book book = Book.builder()
+                .title("test title")
+                .author("test author")
+                .description("test description")
+                .publisher("test publisher")
+                .publishedDate(LocalDate.now())
+                .isbn("1111111111")
+                .thumbnailUrl("test")
+                .build();
+
+        em.persist(book);
+
+        BookStats bookStats = BookStats.builder()
+                .book(book)
+                .reviewCount(0)
+                .ratingSum(0)
+                .build();
+
+        book.setBookStats(bookStats);
+        em.persist(bookStats);
+
+        em.flush();
+
         //리뷰 생성
         UUID reviewId = UUID.randomUUID();
 
         Review review = new Review()
                 .id(reviewId)
-                .book(null)
+                .book(book)
                 .user(user)
                 .rating(5)
                 .content("review content")
@@ -395,7 +522,7 @@ public class CommentIntegrationTest {
                 .id(reviewId)
                 .review(review)
                 .likeCount(0)
-                .commentCount(0);
+                .commentCount(2);
 
         review.reviewStat(stat);
 
@@ -424,11 +551,19 @@ public class CommentIntegrationTest {
         //then
         assertThat(result.getResponse().getStatus()).isEqualTo(204);
 
-        // SoftDelete 적용 → findById는 삭제된 엔티티도 가져올 수 있음
-        Comment deleted = commentRepository.findById(commentId).orElse(null);
-        assertThat(deleted).isNotNull();
 
-        // 하지만 findAll에서는 조회되지 않아야 함
+        Comment deleted = commentRepository.findById(commentId).orElse(null);
+        assertThat(deleted).isNull();
+
+        //실제 row는 삭제되지X
+        Object row = em.createNativeQuery("select * from comments where id = :id")
+                .setParameter("id", commentId)
+                .getResultList();;
+        assertThat(row).isNotNull();
+
+        ReviewStat reviewStat = em.find(ReviewStat.class, reviewId);
+        assertThat(reviewStat.commentCount()).isEqualTo(1);
+
         List<Comment> comments = commentRepository.findAll();
         assertThat(comments).isEmpty();
     }
@@ -445,12 +580,36 @@ public class CommentIntegrationTest {
                 .build();
         userRepository.saveAndFlush(user);
 
+        //도서 생성 및 저장
+        Book book = Book.builder()
+                .title("test title")
+                .author("test author")
+                .description("test description")
+                .publisher("test publisher")
+                .publishedDate(LocalDate.now())
+                .isbn("1111111111")
+                .thumbnailUrl("test")
+                .build();
+
+        em.persist(book);
+
+        BookStats bookStats = BookStats.builder()
+                .book(book)
+                .reviewCount(0)
+                .ratingSum(0)
+                .build();
+
+        book.setBookStats(bookStats);
+        em.persist(bookStats);
+
+        em.flush();
+
         //리뷰 생성
         UUID reviewId = UUID.randomUUID();
 
         Review review = new Review()
                 .id(reviewId)
-                .book(null)
+                .book(book)
                 .user(user)
                 .rating(5)
                 .content("review content")
@@ -461,7 +620,7 @@ public class CommentIntegrationTest {
                 .id(reviewId)
                 .review(review)
                 .likeCount(0)
-                .commentCount(0);
+                .commentCount(2);
 
         review.reviewStat(stat);
 
@@ -498,5 +657,8 @@ public class CommentIntegrationTest {
         // 전체 리스트에서도 없어야 함
         List<Comment> all = commentRepository.findAll();
         assertThat(all).isEmpty();
+
+        ReviewStat reviewStat = em.find(ReviewStat.class, reviewId);
+        assertThat(reviewStat.commentCount()).isEqualTo(1);
     }
 }

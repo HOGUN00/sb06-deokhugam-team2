@@ -42,14 +42,14 @@ public class CommentQueryRepositoryImpl implements CommentQueryRepository {
                 condition.and(
                         comment.createdAt.lt(after)
                                 .or(comment.createdAt.eq(after)
-                                        .and(cursor != null ? comment.id.lt(cursor) : Expressions.TRUE)
+                                        .and(cursor != null ? comment.id.loe(cursor) : Expressions.TRUE)
                                 )
                 );
             } else {
                 condition.and(
                         comment.createdAt.gt(after)
                                 .or(comment.createdAt.eq(after)
-                                        .and(cursor != null ? comment.id.gt(cursor) : Expressions.TRUE)
+                                        .and(cursor != null ? comment.id.goe(cursor) : Expressions.TRUE)
                                 )
                 );
             }
@@ -62,7 +62,7 @@ public class CommentQueryRepositoryImpl implements CommentQueryRepository {
                 .selectFrom(comment)
                 .where(condition)
                 .orderBy(order1, order2)
-                .limit(size)
+                .limit(size + 1)
                 .fetch();
     }
 
@@ -77,15 +77,5 @@ public class CommentQueryRepositoryImpl implements CommentQueryRepository {
                         comment.review.id.eq(reviewId)
                 )
                 .fetchOne();
-    }
-
-    private BooleanExpression cursorCondition(QComment comment, Instant after, UUID cursor) {
-
-        if (after == null || cursor == null) {
-            return null;
-        }
-
-        return comment.createdAt.eq(after)
-                .and(comment.id.lt(cursor));
     }
 }

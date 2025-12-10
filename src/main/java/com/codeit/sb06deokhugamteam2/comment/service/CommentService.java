@@ -104,6 +104,7 @@ public class CommentService {
         return commentMapper.toDto(updatedComment);
     }
 
+    @Transactional(readOnly = true)
     public CommentDto readComment(UUID commentId) {
         log.info("reading comment : commentId = {}", commentId);
 
@@ -156,23 +157,25 @@ public class CommentService {
         );
 
 
-        List<CommentDto> dtos = comments.stream()
-                .map(commentMapper::toDto)
-                .toList();
+
 
 
         long total = commentRepository.countByReviewId(reviewId);
 
+        boolean hasNext = comments.size() > size;
+        if (hasNext) {
+            comments = comments.subList(0, size);
+        }
 
-        String nextCursor = comments.isEmpty() ? null :
-                comments.get(comments.size() - 1).getId().toString();
+        List<CommentDto> dtos = comments.stream()
+                .map(commentMapper::toDto)
+                .toList();
+
+        String nextCursor = hasNext ? comments.get(size - 1).getId().toString() : null;
+        Instant nextAfter = hasNext ? comments.get(size - 1).getCreatedAt() : null;
 
 
-        Instant nextAfter = comments.isEmpty() ? null :
-                comments.get(comments.size() - 1).getCreatedAt();
 
-
-        boolean hasNext = !comments.isEmpty() && comments.size() == size;
 
 
         return new CursorPageResponseCommentDto(
@@ -200,7 +203,7 @@ public class CommentService {
         }
 
         if(foundComment.getReview() == null)
-          new CommentException(ErrorCode.INVALID_DATA, Map.of("commentId", commentId,"message","review does not exsist"), HttpStatus.NOT_FOUND);
+          throw new CommentException(ErrorCode.INVALID_DATA, Map.of("commentId", commentId,"message","review does not exsist"), HttpStatus.NOT_FOUND);
 
         SetReviewCount(foundComment.getReview().id(),-1);
 
@@ -219,6 +222,10 @@ public class CommentService {
                     Map.of("commentId", commentId),
                     HttpStatus.FORBIDDEN
             );
+        }
+
+        if (!foundComment.getDeleted()) {
+            softDelete(commentId, userId);
         }
 
         commentRepository.hardDeleteById(commentId);

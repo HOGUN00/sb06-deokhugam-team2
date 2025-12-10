@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public interface CommentRepository extends JpaRepository<Comment, UUID>, CommentQueryRepository {
 
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = "DELETE FROM COMMENTS WHERE id = :commentId", nativeQuery = true)
     void hardDeleteById(@Param("commentId") UUID commentId);

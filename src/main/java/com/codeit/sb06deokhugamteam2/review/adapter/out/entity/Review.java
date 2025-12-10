@@ -50,7 +50,7 @@ public class Review {
 
     @NotNull
     @Column(name = "deleted", nullable = false)
-    private Boolean deleted;
+    private Boolean deleted = false;
 
     public Review id(UUID id) {
         this.id = id;
