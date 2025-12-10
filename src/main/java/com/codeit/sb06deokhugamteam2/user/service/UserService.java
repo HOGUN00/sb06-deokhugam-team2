@@ -3,7 +3,6 @@ package com.codeit.sb06deokhugamteam2.user.service;
 import com.codeit.sb06deokhugamteam2.common.enums.PeriodType;
 import com.codeit.sb06deokhugamteam2.common.enums.RankingType;
 import com.codeit.sb06deokhugamteam2.common.exception.ErrorCode;
-import com.codeit.sb06deokhugamteam2.common.exception.exceptions.BasicException;
 import com.codeit.sb06deokhugamteam2.common.exception.exceptions.UserException;
 import com.codeit.sb06deokhugamteam2.user.dto.CursorPageResponse;
 import com.codeit.sb06deokhugamteam2.user.dto.PowerUserDto;
@@ -27,7 +26,6 @@ import org.springframework.validation.Validator;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 
@@ -41,13 +39,12 @@ public class UserService {
     private final UserQueryRepository userQueryRepository;
     private final UserMapper userMapper;
     private final Validator validator;
-    // private final ReviewRepository reviewRepository;
-    // private final CommentRepository commentRepository;
+
 
     @Transactional
     public UserDto register(UserRegisterRequest request) {
 
-        if (userRepository.findByEmail(request.email()).isPresent()) {
+        if (userQueryRepository.findByEmailWithDeleted(request.email()).isPresent()) {
             throw new UserException(ErrorCode.DUPLICATE_EMAIL, Collections.emptyMap(),
                     HttpStatus.CONFLICT);
         }
@@ -59,7 +56,7 @@ public class UserService {
     }
 
     public UserDto login(UserLoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
+        User user = userQueryRepository.findByEmailWithDeleted(request.email())
                 .orElseThrow(() -> new UserException(ErrorCode.INVALID_USER_DATA, Collections.emptyMap(),
                     HttpStatus.BAD_REQUEST));
 

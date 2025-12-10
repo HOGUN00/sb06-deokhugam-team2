@@ -9,7 +9,6 @@ import com.codeit.sb06deokhugamteam2.review.application.service.ReviewCommandSer
 import com.codeit.sb06deokhugamteam2.user.entity.User;
 import com.codeit.sb06deokhugamteam2.user.dto.UserLoginRequest;
 import com.codeit.sb06deokhugamteam2.user.dto.UserRegisterRequest;
-import com.codeit.sb06deokhugamteam2.user.dto.UserUpdateRequest;
 import com.codeit.sb06deokhugamteam2.book.entity.Book;
 import com.codeit.sb06deokhugamteam2.user.repository.UserRepository;
 import com.codeit.sb06deokhugamteam2.user.repository.UserQueryRepository;
@@ -163,7 +162,7 @@ class UserControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest()) // 400 BAD_REQUEST
 
-                .andExpect(jsonPath("$.code").value(ErrorCode.INVALID_USER_PASSWORD.toString()));
+                .andExpect(jsonPath("$.code").value(ErrorCode.INVALID_USER_DATA.toString()));
     }
 
     // 3. 사용자 정보 조회 (GET /api/users/{userId}) 테스트
@@ -198,18 +197,20 @@ class UserControllerIntegrationTest {
     @DisplayName("4-1. 닉네임 수정 성공")
     void updateNickname_success() throws Exception {
         // given
-        UserUpdateRequest request = new UserUpdateRequest("변경된닉네임");
+        String newNickname = "변경된닉네임";
+        // 요청 인자가 단순 String, String 값 자체를 JSON 형태로 전송
+        String requestBody = objectMapper.writeValueAsString(newNickname);
 
         // when & then
         mockMvc.perform(patch(BASE_URL + "/{userId}", testUser.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(requestBody))
                 .andExpect(status().isOk()) // 200 OK
-                .andExpect(jsonPath("$.nickname").value("변경된닉네임"));
+                .andExpect(jsonPath("$.nickname").value(newNickname));
 
         // 데이터베이스에서 실제 변경 확인
         User updatedUser = userRepository.findById(testUser.getId()).get();
-        assertThat(updatedUser.getNickname()).isEqualTo("변경된닉네임");
+        assertThat(updatedUser.getNickname()).isEqualTo(newNickname);
     }
 
     // 5. 사용자 논리 삭제 (DELETE /api/users/{userId}) 테스트

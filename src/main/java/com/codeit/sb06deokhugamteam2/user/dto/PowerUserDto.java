@@ -7,18 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-//public record PowerUserDto(
-//        UUID userId,
-//        String nickname,
-//        String period,
-//        LocalDateTime createdAt,
-//        long rank,
-//        double score,
-//        double reviewScoreSum,
-//        long likeCount,
-//        long commentCount
-//) {
-//}
 
 @Setter
 @Getter
