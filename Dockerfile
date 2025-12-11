@@ -12,7 +12,7 @@ FROM amazoncorretto:17-alpine
 
 # 환경 변수 설정
 ENV PROJECT_NAME=sb06-deokhugam-team2
-ENV PROJECT_VERSION=0.0.3-SNAPSHOT
+ENV PROJECT_VERSION=0.0.4-SNAPSHOT
 ENV JVM_OPTS=""
 
 # 빌드 스테이지에서 생성된 JAR 복사
