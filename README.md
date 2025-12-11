@@ -109,6 +109,329 @@
 
 ## 파일 구조
 
+sb06-deokhugam-team2
+├── build.gradle
+├── docker-compose.yml
+├── Dockerfile
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradlew
+├── gradlew.bat
+├── README.md
+├── settings.gradle
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── com
+    │   │       └── codeit
+    │   │           └── sb06deokhugamteam2
+    │   │               ├── book
+    │   │               │   ├── client
+    │   │               │   │   └── NaverSearchClient.java
+    │   │               │   ├── controller
+    │   │               │   │   └── BookController.java
+    │   │               │   ├── dto
+    │   │               │   │   ├── data
+    │   │               │   │   │   ├── BookDashboardDto.java
+    │   │               │   │   │   ├── BookDto.java
+    │   │               │   │   │   └── PopularBookDto.java
+    │   │               │   │   ├── request
+    │   │               │   │   │   ├── BookCreateRequest.java
+    │   │               │   │   │   ├── BookImageCreateRequest.java
+    │   │               │   │   │   └── BookUpdateRequest.java
+    │   │               │   │   └── response
+    │   │               │   │       ├── CursorPageResponseBookDto.java
+    │   │               │   │       ├── CursorPageResponsePopularBookDto.java
+    │   │               │   │       ├── NaverBookDto.java
+    │   │               │   │       └── NaverSearchResponse.java
+    │   │               │   ├── entity
+    │   │               │   │   ├── Book.java
+    │   │               │   │   └── BookStats.java
+    │   │               │   ├── mapper
+    │   │               │   │   ├── BookCursorMapper.java
+    │   │               │   │   └── BookMapper.java
+    │   │               │   ├── package-info.java
+    │   │               │   ├── repository
+    │   │               │   │   ├── BookRepository.java
+    │   │               │   │   ├── BookRepositoryCustom.java
+    │   │               │   │   └── BookRepositoryCustomImpl.java
+    │   │               │   ├── service
+    │   │               │   │   ├── BookService.java
+    │   │               │   │   └── OcrService.java
+    │   │               │   └── storage
+    │   │               │       └── S3Storage.java
+    │   │               ├── comment
+    │   │               │   ├── controller
+    │   │               │   │   └── CommentController.java
+    │   │               │   ├── dto
+    │   │               │   │   ├── CommentCreateRequest.java
+    │   │               │   │   ├── CommentDto.java
+    │   │               │   │   ├── CommentUpdateRequest.java
+    │   │               │   │   └── CursorPageResponseCommentDto.java
+    │   │               │   ├── entity
+    │   │               │   │   └── Comment.java
+    │   │               │   ├── mapper
+    │   │               │   │   └── CommentMapper.java
+    │   │               │   ├── package-info.java
+    │   │               │   ├── repository
+    │   │               │   │   ├── CommentQueryRepository.java
+    │   │               │   │   ├── CommentQueryRepositoryImpl.java
+    │   │               │   │   └── CommentRepository.java
+    │   │               │   └── service
+    │   │               │       └── CommentService.java
+    │   │               ├── common
+    │   │               │   ├── config
+    │   │               │   │   ├── DataSourceConfig.java
+    │   │               │   │   ├── LoggingInterceptor.java
+    │   │               │   │   ├── OkHttpConfig.java
+    │   │               │   │   ├── QueryCountInterceptor.java
+    │   │               │   │   ├── QuerydslConfig.java
+    │   │               │   │   ├── RestTemplateConfig.java
+    │   │               │   │   └── WebConfig.java
+    │   │               │   ├── enums
+    │   │               │   │   ├── PeriodType.java
+    │   │               │   │   └── RankingType.java
+    │   │               │   ├── exception
+    │   │               │   │   ├── ErrorCode.java
+    │   │               │   │   ├── ErrorResponse.java
+    │   │               │   │   ├── exceptions
+    │   │               │   │   │   ├── AWSException.java
+    │   │               │   │   │   ├── BasicException.java
+    │   │               │   │   │   ├── BookException.java
+    │   │               │   │   │   ├── CommentException.java
+    │   │               │   │   │   ├── MDCException.java
+    │   │               │   │   │   ├── NaverSearchException.java
+    │   │               │   │   │   ├── NotificationException.java
+    │   │               │   │   │   ├── OcrException.java
+    │   │               │   │   │   └── UserException.java
+    │   │               │   │   ├── GlobalExceptionHandler.java
+    │   │               │   │   └── package-info.java
+    │   │               │   └── interceptor
+    │   │               │       └── UserIdHeaderInterceptor.java
+    │   │               ├── dashboard
+    │   │               │   ├── batch
+    │   │               │   │   ├── book
+    │   │               │   │   │   ├── BookDashboardCreateBatchConfig.java
+    │   │               │   │   │   └── BookDashboardScheduler.java
+    │   │               │   │   ├── listener
+    │   │               │   │   │   └── RankingListener.java
+    │   │               │   │   ├── review
+    │   │               │   │   │   ├── ReviewDashboardCreateBatchConfig.java
+    │   │               │   │   │   └── ReviewDashboardScheduler.java
+    │   │               │   │   └── user
+    │   │               │   │       ├── UserDashboardJobConfig.java
+    │   │               │   │       └── UserDashboardScheduler.java
+    │   │               │   ├── controller
+    │   │               │   │   └── DashboardController.java
+    │   │               │   ├── dto
+    │   │               │   │   ├── data
+    │   │               │   │   │   ├── PopularReviewDto.java
+    │   │               │   │   │   └── ReviewReaderItemDto.java
+    │   │               │   │   └── response
+    │   │               │   │       └── CursorPageResponsePopularReviewDto.java
+    │   │               │   ├── entity
+    │   │               │   │   └── Dashboard.java
+    │   │               │   ├── repository
+    │   │               │   │   ├── DashboardRepository.java
+    │   │               │   │   ├── DashboardRepositoryCustom.java
+    │   │               │   │   ├── DashboardRepositoryImpl.java
+    │   │               │   │   ├── UserRepositoryExtension.java
+    │   │               │   │   └── UserRepositoryExtensionImpl.java
+    │   │               │   └── service
+    │   │               │       └── DashboardService.java
+    │   │               ├── like
+    │   │               │   ├── adapter
+    │   │               │   │   ├── in
+    │   │               │   │   │   └── event
+    │   │               │   │   │       └── LikeReviewEventHandler.java
+    │   │               │   │   └── out
+    │   │               │   │       ├── entity
+    │   │               │   │       │   ├── ReviewLike.java
+    │   │               │   │       │   └── ReviewLikeId.java
+    │   │               │   │       └── repository
+    │   │               │   │           └── LikeReviewJpaRepository.java
+    │   │               │   ├── application
+    │   │               │   │   ├── port
+    │   │               │   │   │   ├── in
+    │   │               │   │   │   │   ├── CancelReviewLikeUseCase.java
+    │   │               │   │   │   │   ├── DeleteReviewLikesUseCase.java
+    │   │               │   │   │   │   └── LikeReviewUseCase.java
+    │   │               │   │   │   └── out
+    │   │               │   │   │       └── SaveLikeReviewPort.java
+    │   │               │   │   └── service
+    │   │               │   │       └── LikeReviewCommandService.java
+    │   │               │   └── package-info.java
+    │   │               ├── notification
+    │   │               │   ├── batch
+    │   │               │   │   ├── NotificationDeleteBatchConfig.java
+    │   │               │   │   ├── NotificationReadAllBatchConfig.java
+    │   │               │   │   └── NotificationScheduler.java
+    │   │               │   ├── controller
+    │   │               │   │   └── NotificationController.java
+    │   │               │   ├── entity
+    │   │               │   │   ├── dto
+    │   │               │   │   │   ├── NotificaionCursorDto.java
+    │   │               │   │   │   ├── NotificationDto.java
+    │   │               │   │   │   ├── request
+    │   │               │   │   │   │   ├── NotificationCreateRequest.java
+    │   │               │   │   │   │   └── NotificationUpdateRequest.java
+    │   │               │   │   │   └── response
+    │   │               │   │   │       └── NotificationCursorResponse.java
+    │   │               │   │   └── Notification.java
+    │   │               │   ├── NotificationComponent.java
+    │   │               │   ├── package-info.java
+    │   │               │   ├── repository
+    │   │               │   │   ├── NotificationRepository.java
+    │   │               │   │   ├── NotificationRepositoryDsl.java
+    │   │               │   │   └── NotificationRepositoryDslImpl.java
+    │   │               │   └── service
+    │   │               │       ├── NotificationService.java
+    │   │               │       └── NotificationServiceImpl.java
+    │   │               ├── review
+    │   │               │   ├── adapter
+    │   │               │   │   ├── in
+    │   │               │   │   │   └── web
+    │   │               │   │   │       ├── ReviewApi.java
+    │   │               │   │   │       ├── ReviewController.java
+    │   │               │   │   │       └── ReviewControllerAdvice.java
+    │   │               │   │   └── out
+    │   │               │   │       ├── entity
+    │   │               │   │       │   ├── Review.java
+    │   │               │   │       │   └── ReviewStat.java
+    │   │               │   │       ├── event
+    │   │               │   │       │   └── ReviewEventPublisherAdapter.java
+    │   │               │   │       ├── mapper
+    │   │               │   │       │   ├── ReviewJpaMapper.java
+    │   │               │   │       │   └── ReviewStatJpaMapper.java
+    │   │               │   │       └── repository
+    │   │               │   │           ├── ReviewBookJpaRepository.java
+    │   │               │   │           ├── ReviewCommentJpaRepository.java
+    │   │               │   │           ├── ReviewJpaRepository.java
+    │   │               │   │           ├── ReviewLikeJpaRepository.java
+    │   │               │   │           ├── ReviewNotificationRepository.java
+    │   │               │   │           └── ReviewUserJpaRepository.java
+    │   │               │   ├── application
+    │   │               │   │   ├── dto
+    │   │               │   │   │   ├── request
+    │   │               │   │   │   │   ├── CursorPageRequestReviewDto.java
+    │   │               │   │   │   │   ├── ReviewCreateRequest.java
+    │   │               │   │   │   │   └── ReviewUpdateRequest.java
+    │   │               │   │   │   └── response
+    │   │               │   │   │       ├── CursorPageResponseReviewDto.java
+    │   │               │   │   │       ├── ReviewDto.java
+    │   │               │   │   │       └── ReviewLikeDto.java
+    │   │               │   │   ├── port
+    │   │               │   │   │   ├── in
+    │   │               │   │   │   │   ├── CreateReviewUseCase.java
+    │   │               │   │   │   │   ├── DeleteReviewUseCase.java
+    │   │               │   │   │   │   ├── GetReviewUseCase.java
+    │   │               │   │   │   │   ├── ToggleReviewLikeUseCase.java
+    │   │               │   │   │   │   └── UpdateReviewUseCase.java
+    │   │               │   │   │   └── out
+    │   │               │   │   │       ├── LoadReviewBookPort.java
+    │   │               │   │   │       ├── LoadReviewLikePort.java
+    │   │               │   │   │       ├── LoadReviewPort.java
+    │   │               │   │   │       ├── LoadReviewUserPort.java
+    │   │               │   │   │       ├── ReviewEventPublisher.java
+    │   │               │   │   │       ├── SaveReviewBookPort.java
+    │   │               │   │   │       ├── SaveReviewCommentPort.java
+    │   │               │   │   │       ├── SaveReviewNotificationPort.java
+    │   │               │   │   │       ├── SaveReviewPort.java
+    │   │               │   │   │       └── SaveReviewUserPort.java
+    │   │               │   │   └── service
+    │   │               │   │       ├── ReviewCommandService.java
+    │   │               │   │       └── ReviewQueryService.java
+    │   │               │   ├── domain
+    │   │               │   │   ├── event
+    │   │               │   │   │   ├── ReviewDeletedEvent.java
+    │   │               │   │   │   ├── ReviewLikeCanceledEvent.java
+    │   │               │   │   │   └── ReviewLikedEvent.java
+    │   │               │   │   ├── exception
+    │   │               │   │   │   ├── AlreadyExistsReviewException.java
+    │   │               │   │   │   ├── InvalidReviewContentException.java
+    │   │               │   │   │   ├── InvalidReviewCountException.java
+    │   │               │   │   │   ├── InvalidReviewRatingException.java
+    │   │               │   │   │   ├── ReviewBookNotFoundException.java
+    │   │               │   │   │   ├── ReviewException.java
+    │   │               │   │   │   ├── ReviewNotFoundException.java
+    │   │               │   │   │   ├── ReviewPermissionDeniedException.java
+    │   │               │   │   │   └── ReviewUserNotFoundException.java
+    │   │               │   │   ├── model
+    │   │               │   │   │   ├── ReviewBookDomain.java
+    │   │               │   │   │   ├── ReviewContentDomain.java
+    │   │               │   │   │   ├── ReviewCountDomain.java
+    │   │               │   │   │   ├── ReviewDomain.java
+    │   │               │   │   │   ├── ReviewLikeDomain.java
+    │   │               │   │   │   ├── ReviewLikeNotificationDomain.java
+    │   │               │   │   │   ├── ReviewRatingDomain.java
+    │   │               │   │   │   ├── ReviewStatDomain.java
+    │   │               │   │   │   └── ReviewUserDomain.java
+    │   │               │   │   └── service
+    │   │               │   │       └── ReviewService.java
+    │   │               │   └── package-info.java
+    │   │               ├── Sb06DeokhugamTeam2Application.java
+    │   │               └── user
+    │   │                   ├── controller
+    │   │                   │   └── UserController.java
+    │   │                   ├── dto
+    │   │                   │   ├── CursorPageResponse.java
+    │   │                   │   ├── PowerUserDto.java
+    │   │                   │   ├── UserDto.java
+    │   │                   │   ├── UserLoginRequest.java
+    │   │                   │   ├── UserRegisterRequest.java
+    │   │                   │   └── UserUpdateRequest.java
+    │   │                   ├── entity
+    │   │                   │   └── User.java
+    │   │                   ├── mapper
+    │   │                   │   └── UserMapper.java
+    │   │                   ├── package-info.java
+    │   │                   ├── repository
+    │   │                   │   ├── UserQueryRepository.java
+    │   │                   │   └── UserRepository.java
+    │   │                   ├── scheduler
+    │   │                   │   └── UserBatchScheduler.java
+    │   │                   └── service
+    │   │                       └── UserService.java
+    │   └── resources
+    │       ├── application-local.yaml
+    │       ├── application-prod.yaml
+    │       ├── application.yaml
+    │       ├── db
+    │       │   └── migration
+    │       │       ├── V1__init.sql
+    │       │       ├── V2__change_table_names.sql
+    │       │       ├── V3__remove_redundant_colums.sql
+    │       │       ├── V4__add_cascade.sql
+    │       │       └── V5__add_version_to_book.sql
+    │       ├── logback-spring.xml
+    └── test
+        ├── java
+        │   └── com
+        │       └── codeit
+        │           └── sb06deokhugamteam2
+        │               ├── book
+        │               │   ├── BookIntegrationTest.java
+        │               │   ├── fixture
+        │               │   │   └── BookFixture.java
+        │               │   └── repository
+        │               │       └── BookVersionWithSQLRestrictionRepositoryTest.java
+        │               ├── comment
+        │               │   └── CommentIntegrationTest.java
+        │               ├── dashboard
+        │               │   ├── DashboardIntegrationTest.java
+        │               │   └── fixture
+        │               │       └── DashboardFixture.java
+        │               ├── notification
+        │               │   └── NotificationTest.java
+        │               ├── review
+        │               │   └── ReviewTest.java
+        │               ├── Sb06DeokhugamTeam2ApplicationTests.java
+        │               └── user
+        │                   └── UserControllerIntegrationTest.java
+        └── resources
+            └── application-test.yaml
 
 ---
 
