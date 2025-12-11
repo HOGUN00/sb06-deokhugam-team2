@@ -2,12 +2,12 @@
 (팀 협업 문서 링크 게시)
 
 ## 팀원 구성
-- 이진우 ([개인 Github 링크])
-- 김승빈 ([개인 Github 링크])
-- 김태현 ([개인 Github 링크])
-- 박종건 ([개인 Github 링크])
-- 이호건 ([개인 Github 링크])
-- 조동현 ([개인 Github 링크])
+- 이진우 ([Github 링크](https://github.com/jionu102))
+- 김승빈 ([Github 링크](https://github.com/mainlib990))
+- 김태현 ([Github 링크](https://github.com/kimtaehyun80))
+- 박종건 ([Github 링크](https://github.com/3Park))
+- 이호건 ([Github 링크](https://github.com/HOGUN00))
+- 조동현 ([Github 링크](https://github.com/donghyun9898))
 
 ---
 
