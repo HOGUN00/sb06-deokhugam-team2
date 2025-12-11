@@ -21,7 +21,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ vars.AWS_S3_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -51,7 +51,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ vars.AWS_S3_REGION }}
 
       - name: Download task definition template
         run: |
@@ -64,7 +64,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
-          container-name: ${{ vars.ECS_CONTAINER }}
+          container-name: ${{ vars.ECS_CONTAINER_NAME }}
           image: ${{ vars.ECR_REPOSITORY_URI }}:${{ needs.build-and-push.outputs.image-tag }}
 
       - name: Deploy to ECS
