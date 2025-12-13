@@ -169,7 +169,6 @@ public class BookService {
         return bookMapper.toDto(findBook);
     }
 
-    // todo 책임 분리 필요
     @Transactional(readOnly = true)
     public CursorPageResponsePopularBookDto getPopularBooks(PeriodType period, String cursor, Instant after, Sort.Direction direction, Integer limit) {
 
