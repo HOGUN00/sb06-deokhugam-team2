@@ -4,15 +4,14 @@ services:
     image: postgres:17
     container_name: deokhugam-db
     environment:
-      POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME}
-      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: discodeit_db
       TZ: Asia/Seoul
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
       - "5432:5432"
     volumes:
-      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
       - db_data:/var/lib/postgresql/data
     env_file:
       - .env

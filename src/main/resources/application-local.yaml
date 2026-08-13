@@ -1,12 +1,14 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testDB
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:postgresql://localhost:5432/discodeit_db
+    username: postgres
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: none
+
   sql:
     init:
       mode: never
