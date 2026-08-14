@@ -17,6 +17,12 @@
 
 ---
 
+## 🏗️ 시스템 아키텍처
+
+> 이미지
+
+---
+
 ## 📌 목차
 
 1. [담당 기능 요약](#-담당-기능-요약)
@@ -41,53 +47,20 @@
 
 ## 🔍 핵심 구현과 검증
 
-### 1. 낙관적 락 적용과 PostgreSQL 검증 결과
+> 상세한 기술 선택 이유, 구현 흐름, 동시성 검증 결과와 개선 방향은 개발리포트에 정리했습니다.
+> 📄 [덕후감 개발리포트](https://app.notion.com/p/cf9203c86c59824b9d7d01f1f2a74229)
 
-> `@Version`과 Spring Retry로 도서 수정·논리 삭제 충돌을 감지하도록 구현하고, PostgreSQL 검증 결과를 통해 자동 Retry가 사용자 변경까지 보존하지는 않는다는 한계를 확인했습니다.
+### 1. 낙관적 락과 동시성 제어
 
-도서 수정과 논리 삭제가 빈번하지 않을 것으로 예상해, 항상 행 잠금을 점유하는 비관적 락보다 충돌 시점에 이를 감지하는 낙관적 락을 선택했습니다. `Book.version`에 `@Version`을 적용하고, 충돌 시 `ObjectOptimisticLockingFailureException`만 재시도하도록 구성했습니다.
+도서 수정·논리 삭제 충돌을 감지하기 위해 JPA `@Version`과 Spring Retry를 적용했습니다. PostgreSQL 동시성 테스트 결과를 검토해 전체 상태 자동 재시도가 앞선 변경을 덮을 수 있는 한계를 확인하고, 클라이언트 version 비교와 `409 Conflict` 반환을 개선 방향으로 정리했습니다.
 
-구현 이후 Codex가 구성·실행한 로컬 Docker PostgreSQL 17.6 동시성 테스트의 코드와 결과를 검토했습니다. 테스트에서는 여러 요청이 같은 version을 읽은 뒤 동시에 갱신하도록 실행 시점을 맞추는 `CyclicBarrier`를 사용했습니다.
+### 2. 인기 도서 배치와 커서 조회
 
-* Retry 없는 두 트랜잭션은 5회 모두 1건 성공, 1건 낙관적 락 예외가 발생했습니다.
-* 10개 동시 수정 요청은 Retry 후 3회 모두 10/10 성공했고 최종 version은 10이었습니다.
-* 서로 다른 필드를 수정해도 재시도된 요청이 오래된 전체 상태를 다시 적용해 앞선 변경을 덮을 수 있었습니다.
-
-현재 구현은 기술적인 UPDATE 충돌은 감지하지만 사용자 관점의 갱신 유실까지 막지는 못합니다. 향후에는 전체 수정의 자동 Retry를 제거하거나 제한하고, 클라이언트 version이 다르면 `409 Conflict`를 반환하는 방향이 적합하다고 판단했습니다.
-
----
-
-### 2. 인기 도서 배치 생성과 커서 조회
-
-> 요청마다 전체 리뷰를 집계하는 대신 Spring Batch로 기간별 순위를 미리 계산해 저장하고, QueryDSL 커서 방식으로 조회했습니다.
-
-인기 도서·인기 리뷰·파워 유저 결과를 함께 관리할 수 있도록 `ranking_type`, `period_type`, `entity_id`, `rank`, `score`, 생성 시각을 가진 공통 `dashboard` 테이블을 직접 설계했습니다.
-
-```text
-기간별 리뷰 SQL 집계
-  → JdbcCursorItemReader로 순차 조회
-  → Processor에서 순위 부여
-  → JpaItemWriter로 dashboard 스냅샷 저장
-```
-
-* 100개 단위 chunk로 데이터를 처리했습니다.
-* DAILY·WEEKLY·MONTHLY·ALL_TIME Job을 자정부터 1분 간격으로 실행했습니다.
-* 조회에서는 `limit+1`개를 가져와 다음 페이지 존재 여부를 판단했습니다.
-* 동적으로 조합되는 기간·정렬·커서 조건은 QueryDSL로 구현했습니다.
-
-다만 배치 SQL에 논리 삭제된 리뷰를 제외하는 조건이 없고, 같은 날 여러 번 실행한 스냅샷을 구분하지 못합니다. 커서 조건이 rank만 사용되는 점과 응답 생성 과정의 N+1 가능성도 후속 개선 대상으로 확인했습니다.
-
----
+공통 `dashboard` 테이블을 설계하고 Spring Batch로 기간별 인기 도서 순위를 미리 생성·저장한 뒤, QueryDSL 커서 방식으로 조회했습니다. 논리 삭제 리뷰 제외 조건, 실행별 스냅샷 구분, rank 단독 커서와 N+1 가능성을 후속 개선 대상으로 확인했습니다.
 
 ### 3. 도서 논리 삭제와 전파 방식
 
-> 도서 논리 삭제를 담당했으며, 연관 데이터 전파와 물리 삭제 방식은 팀 회의에서 결정해 프로젝트에 적용했습니다.
-
-도서 서비스가 리뷰·댓글 서비스의 내부 로직에 직접 의존하지 않도록, 팀 회의에서 Repository bulk UPDATE를 사용하는 방식으로 결정했습니다. 전파 순서는 하위 데이터부터 처리하도록 댓글 → 리뷰 → 도서 순서로 구성했습니다.
-
-팀에서 정한 방식에 따라 리뷰와 댓글에는 JPQL bulk UPDATE를 적용했고, 제가 담당한 도서는 managed entity의 dirty checking으로 `deleted` 값을 변경했습니다. 이를 통해 도서 UPDATE에는 `@Version` 조건이 포함되어 수정과 삭제가 경합할 때 충돌을 감지할 수 있습니다.
-
-팀에서 결정한 물리 삭제 방식은 논리 삭제된 도서만 native query로 제거하고, 연관 데이터는 PostgreSQL FK `ON DELETE CASCADE`로 삭제하는 구조입니다. 다만 bulk UPDATE는 연관 도메인의 서비스 로직과 이벤트를 우회하며, 리뷰·댓글 전파와 실제 FK cascade는 통합 테스트로 검증하지 못했습니다.
+도서 논리 삭제를 구현했으며, 팀 회의를 통해 댓글 → 리뷰 → 도서 순서의 Repository bulk UPDATE 전파와 PostgreSQL FK cascade 기반 물리 삭제 방식을 적용했습니다. bulk UPDATE가 서비스 로직과 이벤트를 우회하는 점과 전파 과정의 통합 검증 부족을 한계로 남겼습니다.
 
 ---
 
@@ -95,29 +68,11 @@
 
 ### OCR 기반 ISBN 인식
 
-이미지를 OCR SPACE API로 전달하고 `ParsedText`에서 하이픈으로 구분된 ISBN 후보를 추출했습니다. OCR·도서 정보 조회·도서 등록은 독립 API이며, 사용자는 인식 결과를 화면에서 확인하고 수정할 수 있습니다.
-
-```text
-Multipart 이미지 수신 → 1 MiB 제한 확인 → OCR SPACE 호출
-→ ParsedText 추출 → ISBN 후보 검색 → 하이픈 제거 후 반환
-```
-
-현재는 정규식 형태만 확인하므로 ISBN-10·ISBN-13 길이와 check digit 검증이 필요합니다. OCR 오류 응답과 미검출 상황을 고정하는 외부 API mock 테스트도 후속 과제로 남았습니다.
+이미지를 OCR SPACE API로 전달하고 `ParsedText`에서 ISBN 후보를 추출했으며, 사용자가 인식 결과를 확인·수정할 수 있도록 구성했습니다. 현재는 정규식 형태만 확인하므로 ISBN 길이·check digit 검증과 외부 API mock 테스트가 필요합니다.
 
 ### AWS 배포
 
-RDS·S3·ECR 자원을 직접 생성하고 Amazon ECS의 EC2 시작 유형으로 애플리케이션 배포 환경을 구성했습니다. 제공된 GitHub Actions 예제를 프로젝트 환경에 맞게 수정했습니다.
-
-```text
-main push 또는 수동 실행
-  → Docker 멀티 스테이지 빌드
-  → commit SHA 태그로 ECR push
-  → 기존 ECS task definition 조회
-  → 새 revision 등록
-  → ECS service 갱신
-```
-
-ECS에서 RDS로 연결되지 않는 문제는 RDS 보안 그룹에서 ECS task 보안 그룹의 접근을 허용해 해결했습니다. 비용과 자원 제약으로 기존 task의 desired count를 `0`으로 낮춘 뒤 새 task definition으로 `1`을 올렸으며, 현재 방식은 배포 중 일시적인 중단이 발생할 수 있습니다.
+RDS·S3·ECR 자원을 구성하고 Docker 멀티 스테이지 빌드와 GitHub Actions를 이용한 ECR–ECS 배포 흐름을 적용했습니다. ECS–RDS 연결 문제는 보안 그룹 규칙을 조정해 해결했으며, 자원 제약으로 기존 task를 내린 뒤 새 task를 실행해 배포 중 일시적인 중단이 발생할 수 있습니다.
 
 ---
 
