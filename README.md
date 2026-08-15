@@ -19,7 +19,8 @@
 
 ## 🏗️ 시스템 아키텍처
 
-> 이미지
+> <img width="1800" height="1125" alt="deokhugam-architecture" src="https://github.com/user-attachments/assets/41720487-2889-442f-96b7-7813510e32f3" />
+
 
 ---
 
