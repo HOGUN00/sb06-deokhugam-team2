@@ -1,7 +1,7 @@
 # 📚 덕후감 (Deokhugam)
 
 > 도서 이미지 OCR·ISBN 매칭과 리뷰·댓글을 제공하는 독서 커뮤니티 서비스 \
-> 팀 프로젝트에서 도서 논리 삭제, OCR 기반 ISBN 인식, 인기 도서 배치, 낙관적 락과 AWS 배포를 담당하고 구현 이후 PostgreSQL 동시성 검증을 통해 동작과 한계를 분석한 개인 포크
+> 팀 프로젝트에서 도서 논리 삭제, OCR 기반 ISBN 인식, 인기 도서 배치, 낙관적 락과 AWS 배포를 담당하고 구현 이후 PostgreSQL 동시성 검증 결과를 검토해 동작과 한계를 분석한 개인 포크
 
 [![Java](https://img.shields.io/badge/Java-17-orange)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.8-green)](https://spring.io/projects/spring-boot)
@@ -47,7 +47,7 @@
 
 ### 2. 인기 도서 배치와 커서 조회
 
-공통 `dashboard` 테이블을 설계하고 Spring Batch로 기간별 인기 도서 순위를 미리 생성·저장한 뒤, QueryDSL 커서 방식으로 조회했습니다. 논리 삭제 리뷰 제외 조건, 실행별 스냅샷 구분, rank 단독 커서와 N+1 가능성을 후속 개선 대상으로 확인했습니다.
+공통 `dashboard` 테이블을 설계하고 Spring Batch로 기간별 인기 도서 순위를 미리 생성·저장한 뒤, QueryDSL 커서 방식으로 조회했습니다. 후속 검토에서 집계 정합성, 스냅샷·커서 안정성, 조회 효율을 개선 대상으로 확인했습니다.
 
 ### 3. 도서 논리 삭제와 전파 방식
 
