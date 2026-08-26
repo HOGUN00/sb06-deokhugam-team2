@@ -11,7 +11,7 @@ build/
 *.iml
 
 # 로컬 환경 변수
-.env/
+.env
 
 # 로그, 업로드 폴더
 .logs/
