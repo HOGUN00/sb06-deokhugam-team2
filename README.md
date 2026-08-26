@@ -1,485 +1,111 @@
-# 2팀
-- [GitHub Issue](https://github.com/codeit-team2-intermediate-project/sb06-deokhugam-team2/issues)
-- [Github Project](https://github.com/orgs/codeit-team2-intermediate-project/projects/4/views/4)
+# 📚 덕후감 (Deokhugam)
 
-## 팀원 구성
-- 이진우 ([Github 링크](https://github.com/jionu102))
-- 김승빈 ([Github 링크](https://github.com/mainlib990))
-- 김태현 ([Github 링크](https://github.com/kimtaehyun80))
-- 박종건 ([Github 링크](https://github.com/3Park))
-- 이호건 ([Github 링크](https://github.com/HOGUN00))
-- 조동현 ([Github 링크](https://github.com/donghyun9898))
+> 도서 이미지 OCR·ISBN 매칭과 리뷰·댓글을 제공하는 독서 커뮤니티 서비스 \
+> 팀 프로젝트에서 도서 논리 삭제, OCR 기반 ISBN 인식, 인기 도서 배치, 낙관적 락과 AWS 배포를 담당하고 구현 이후 PostgreSQL 동시성 검증 결과를 검토해 동작과 한계를 분석한 개인 포크
 
----
+[![Java](https://img.shields.io/badge/Java-17-orange)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.8-green)](https://spring.io/projects/spring-boot)
 
-## 프로젝트 소개
+🌐 [서비스 시연 영상](https://drive.google.com/file/d/1AnXWbv5S4cD82CHmEw06vByZOhNqHBoC/view)  | 
+📄 [개발리포트](https://app.notion.com/p/cf9203c86c59824b9d7d01f1f2a74229?source=copy_link)  | 
+🧭 [프로젝트 보드](https://github.com/orgs/codeit-team2-intermediate-project/projects/4/views/1)
 
-덕후감 : 도서 이미지 OCR 및 ISBN 매칭 서비스  
-프로젝트 기간: 2025.11.21 ~ 2025.12.12
+> 원본 프로젝트: [codeit-team2-intermediate-project/sb06-deokhugam-team2](https://github.com/codeit-team2-intermediate-project/sb06-deokhugam-team2) \
+> 팀 프로젝트: 백엔드 6인, 2025.11.21 ~ 12.12 \
+> 담당: 도서 논리 삭제·OCR·인기 도서·도서 동시성 제어·AWS 배포 \
+> 구현 이후: PostgreSQL 동시성 테스트 결과를 검토해 낙관적 락과 Retry의 동작 및 갱신 유실 한계를 분석
 
 ---
 
-## 기술 스택
+## 🏗️ 시스템 아키텍처
 
-- **Backend:** Spring Boot, Lombok, Spring Data JPA, MapStruct, springdoc-openapi, Spring scheduler, Spring batch, Flyway, QueryDSL
-- **Database:** Postgresql
-- **공통 Tool:** Github, Discord
+> <img width="1800" height="1125" alt="deokhugam-architecture" src="https://github.com/user-attachments/assets/41720487-2889-442f-96b7-7813510e32f3" />
 
----
-
-## 팀원별 구현 기능 상세
-
-### 이진우
-- **도서 등록**
-- **도서 정보 수정**
-- **도서 목록 조회**
-    - QueryDsl과 커서 페이지네이션으로 조회
-- **도서 상세 정보 조회**
-- **ISBN으로 도서 정보 조회**
-- **인기 리뷰 목록 조회**
-    - 매일 배치 작업으로 대시보드에 인기 리뷰 저장
-    - QueryDsl과 커서 페이지네이션으로 조회
 
 ---
 
-### 김승빈
-   - 리뷰 쓰기
-       - CQRS 패턴 기반으로 리뷰 생성 로직 구현
-       - 리뷰 작성 시 도서의 총 리뷰 수와 평균 평점을 실시간으로 재계산 및 반영
+## 🙋 담당 기능 요약
 
-   - 리뷰 읽기
-       - 유연한 리뷰 조회 기능 제공
-       - 단일 리뷰 조회 및 커서 기반 페이지네이션을 통한 목록 조회 지원
-       - 사용자, 도서, 키워드 등 다양한 조건에 따른 필터링 및 정렬 기능 제공
-
-   - 리뷰 수정
-       - 기존 리뷰 내용 및 평점 수정 기능 구현
-       - 수정된 평점을 즉시 반영하여 도서의 전체 평점 통계 재계산 및 데이터 정합성 보장
-
-   - 리뷰 삭제
-       - 두 가지 삭제 전략 제공: '소프트 삭제' (숨김 처리) 및 '하드 삭제' (영구 제거)
-       - 각 삭제 방식은 도서의 리뷰 통계 및 관련 데이터 (예: 댓글)에 즉시 반영
-
-   - 리뷰 좋아요
-       - 핵심 리뷰 도메인과 분리된 독립적인 '좋아요' 모듈 구현
-       - 좋아요 상태 토글 (좋아요/취소) 시 이벤트 기반 알림 전송 기능 제공
+| 영역             | 핵심 기술                                      | 담당·경험                                      |
+| -------------- | ------------------------------------------ | ------------------------------------------ |
+| 도서 동시성         | JPA `@Version`, Spring Retry               | 수정·논리 삭제 충돌 감지 구현, PostgreSQL 동시성 검증 결과 분석 |
+| 인기 도서          | Spring Batch, QueryDSL                     | 공통 대시보드 테이블 설계, 기간별 순위 생성과 커서 조회           |
+| 도서 삭제          | bulk UPDATE, `@SQLRestriction`, FK cascade | 도서 논리 삭제 구현, 연관 데이터 전파 방식은 팀 회의로 결정        |
+| OCR 기반 ISBN 인식 | OCR SPACE, OkHttp                          | 이미지 OCR 결과 파싱과 ISBN 후보 추출                  |
+| AWS 배포         | ECS, RDS, S3, ECR, GitHub Actions          | AWS 자원 구성과 Docker 이미지 배포 흐름 적용             |
 
 ---
 
-### 김태현
-- **사용자 회원가입,로그인**
-    - 탈퇴후 재가입,로그인 불가 추가 구현.(요구사항외 구현)
-- **사용자 수정**
-    - 닉네임 수정 구현(프론트에서 string으로 들어오는 요청에 맞게 구현)
-- **사용자 논리,물리 삭제**
-    - 사용자 논리삭제시 연관관계(리뷰,뎃글)도 함께 논리삭제로 전환되도록 구현
-    - 논리삭제후 1일 경과시 물리삭제로 전환 되도록 배치처리
-- **대시보드 파워유저 순위 및 매일배치**
-    - 사용자 활동점수 기준으로 파워유저 순위 구현
-    - 대시보드상의 매일배치 가 이루어지도록 구현
-  
----
+## 🔍 핵심 구현과 검증
 
-### 박종건
-- **알림 읽기**
-  - 알림 일괄 읽기 기능 구현
-  - 알림 단건 읽기 기능 구현
-- **알림 일괄 읽기 및 삭제**
-    - Spring batch 와 scheduler 를 이용해 읽은지 7일 이상 경과된 알림 삭제
-    - Spring batch 와 scheduler 를 이용해 일괄 알림 읽기
-- **알림 조회**
-    - QueryDSL을 이용해 알림 cursor 페이지네이션 조회
-- **알림 등록**
-  - 리뷰, 댓글 작성 등 타 도메인에서 알림등록 가능하도록 등록 컴포넌트 구현
-- **로깅**
-    - HandlerInterceptor 와 logback 설정을 통한 로깅
-    - MDC 적용
-- **전역오류처리**
-    - RestControllerAdvice 를 이용한 전역 오류 처리
-    - 알림 관련 커스텀 Exception 구현
-- **DDL 관리**
-    - Flyway로 DDL 관리      
+> 상세한 기술 선택 이유, 구현 흐름, 동시성 검증 결과와 개선 방향은 개발리포트에 정리했습니다.
+> 📄 [덕후감 개발리포트](https://app.notion.com/p/cf9203c86c59824b9d7d01f1f2a74229)
+
+### 1. 낙관적 락과 동시성 제어
+
+도서 수정·논리 삭제 충돌을 감지하기 위해 JPA `@Version`과 Spring Retry를 적용했습니다. PostgreSQL 동시성 테스트 결과를 검토해 전체 상태 자동 재시도가 앞선 변경을 덮을 수 있는 한계를 확인하고, 클라이언트 version 비교와 `409 Conflict` 반환을 개선 방향으로 정리했습니다.
+
+### 2. 인기 도서 배치와 커서 조회
+
+공통 `dashboard` 테이블을 설계하고 Spring Batch로 기간별 인기 도서 순위를 미리 생성·저장한 뒤, QueryDSL 커서 방식으로 조회했습니다. 후속 검토에서 집계 정합성, 스냅샷·커서 안정성, 조회 효율을 개선 대상으로 확인했습니다.
+
+### 3. 도서 논리 삭제와 전파 방식
+
+도서 논리 삭제를 구현했으며, 팀 회의를 통해 댓글 → 리뷰 → 도서 순서의 Repository bulk UPDATE 전파와 PostgreSQL FK cascade 기반 물리 삭제 방식을 적용했습니다. bulk UPDATE가 서비스 로직과 이벤트를 우회하는 점과 전파 과정의 통합 검증 부족을 한계로 남겼습니다.
 
 ---
 
-### 이호건
-- **도서 삭제**
-    - 논리 삭제, 물리 삭제
-    - 연관된 리뷰, 댓글도 함께 논리 또는 물리 삭제
-- **OCR 기반 ISBN 인식**
-    - OCR SPACE API 사용
-    - 이미지에서 ISBN 자동 추출
-    - 도서 등록 시 이미지에서 ISBN 확인 가능
-- **인기 도서 목록 조회**
-    - 매일 배치 작업으로 대시보드에 인기 도서 저장
-    - Spring Batch 사용
-    - QueryDsl + 커서 기반 페이지네이션으로 효율적 조회
-- **도서 낙관적 락**
-    - 행 단위 버전 관리 (@Version)
-    - 도서 동시 수정 충돌 감지
-- **AWS 관리**
-    - 인프라 관리
-      - RDS(PostgreSQL), ECS, S3, ECR 등 사용
-    - 환경 변수 활용
-      - 데이터베이스 URL, 비밀번호 등 환경 변수로 관리
+## 🧩 기타 담당 구현
 
- ---
- 
-### 조동현
-- **댓글 등록**
-    - 리뷰에 댓글을 작성하는 기능 구현
-    - ReviewStat과 연동하여 댓글 생성시 commentCount가 증가하도록 처리
-    - Notification과 연동하여 댓글 작성시 해당 리뷰 작성자에게 알림이 가도록 처리
-- **댓글 수정**
-    - 본인이 작성한 댓글인지 검증하고 댓글을 수정하는 기능 구현
-- **댓글 단건 조회**
-    - 삭제되지 않은 댓글을 조회하는 기능 구현
-- **댓글 목록 조회**
-    - 커서 페이지네이션 기반으로 댓글 목록을 조회하는 기능 구현
-    - createAt,commentId 두가지를 복합 정렬 조건으로 사용하여 정확한 순서를 보장하도록 하였음
-- **댓글 삭제**
-    - softDelete,hardDelete 두가지 기능을 모두 지원하도록 구현
-    - softDelete 는 deleted 필드를 true처리하여 숨김
-    - hardDelete 는 db사아에서 영구삭제 처리
-    - 논리삭제 되지 않은 댓글을 물리삭제 하려 할때 논리삭제후 물리삭제 되도록 처리
+### OCR 기반 ISBN 인식
+
+이미지를 OCR SPACE API로 전달하고 `ParsedText`에서 ISBN 후보를 추출했으며, 사용자가 인식 결과를 확인·수정할 수 있도록 구성했습니다. 현재는 정규식 형태만 확인하므로 ISBN 길이·check digit 검증과 외부 API mock 테스트가 필요합니다.
+
+### AWS 배포
+
+RDS·S3·ECR 자원을 구성하고 Docker 멀티 스테이지 빌드와 GitHub Actions를 이용한 ECR–ECS 배포 흐름을 적용했습니다. ECS–RDS 연결 문제는 보안 그룹 규칙을 조정해 해결했으며, 자원 제약으로 기존 task를 내린 뒤 새 task를 실행해 배포 중 일시적인 중단이 발생할 수 있습니다.
 
 ---
 
-## 파일 구조
+## 🛠 기술 스택
 
-```text
-sb06-deokhugam-team2
-├── build.gradle
-├── docker-compose.yml
-├── Dockerfile
-├── gradle
-│     └── wrapper
-│         ├── gradle-wrapper.jar
-│         └── gradle-wrapper.properties
-├── gradlew
-├── gradlew.bat
-├── README.md
-├── settings.gradle
-└── src
-    ├── main
-    │     ├── java
-    │     │     └── com
-    │     │         └── codeit
-    │     │             └── sb06deokhugamteam2
-    │     │                 ├── book
-    │     │                 │     ├── client
-    │     │                 │     │     └── NaverSearchClient.java
-    │     │                 │     ├── controller
-    │     │                 │     │     └── BookController.java
-    │     │                 │     ├── dto
-    │     │                 │     │     ├── data
-    │     │                 │     │     │     ├── BookDashboardDto.java
-    │     │                 │     │     │     ├── BookDto.java
-    │     │                 │     │     │     └── PopularBookDto.java
-    │     │                 │     │     ├── request
-    │     │                 │     │     │     ├── BookCreateRequest.java
-    │     │                 │     │     │     ├── BookImageCreateRequest.java
-    │     │                 │     │     │     └── BookUpdateRequest.java
-    │     │                 │     │     └── response
-    │     │                 │     │         ├── CursorPageResponseBookDto.java
-    │     │                 │     │         ├── CursorPageResponsePopularBookDto.java
-    │     │                 │     │         ├── NaverBookDto.java
-    │     │                 │     │         └── NaverSearchResponse.java
-    │     │                 │     ├── entity
-    │     │                 │     │     ├── Book.java
-    │     │                 │     │     └── BookStats.java
-    │     │                 │     ├── mapper
-    │     │                 │     │     ├── BookCursorMapper.java
-    │     │                 │     │     └── BookMapper.java
-    │     │                 │     ├── package-info.java
-    │     │                 │     ├── repository
-    │     │                 │     │     ├── BookRepository.java
-    │     │                 │     │     ├── BookRepositoryCustom.java
-    │     │                 │     │     └── BookRepositoryCustomImpl.java
-    │     │                 │     ├── service
-    │     │                 │     │     ├── BookService.java
-    │     │                 │     │     └── OcrService.java
-    │     │                 │     └── storage
-    │     │                 │         └── S3Storage.java
-    │     │                 ├── comment
-    │     │                 │     ├── controller
-    │     │                 │     │     └── CommentController.java
-    │     │                 │     ├── dto
-    │     │                 │     │     ├── CommentCreateRequest.java
-    │     │                 │     │     ├── CommentDto.java
-    │     │                 │     │     ├── CommentUpdateRequest.java
-    │     │                 │     │     └── CursorPageResponseCommentDto.java
-    │     │                 │     ├── entity
-    │     │                 │     │     └── Comment.java
-    │     │                 │     ├── mapper
-    │     │                 │     │     └── CommentMapper.java
-    │     │                 │     ├── package-info.java
-    │     │                 │     ├── repository
-    │     │                 │     │     ├── CommentQueryRepository.java
-    │     │                 │     │     ├── CommentQueryRepositoryImpl.java
-    │     │                 │     │     └── CommentRepository.java
-    │     │                 │     └── service
-    │     │                 │         └── CommentService.java
-    │     │                 ├── common
-    │     │                 │     ├── config
-    │     │                 │     │     ├── DataSourceConfig.java
-    │     │                 │     │     ├── LoggingInterceptor.java
-    │     │                 │     │     ├── OkHttpConfig.java
-    │     │                 │     │     ├── QueryCountInterceptor.java
-    │     │                 │     │     ├── QuerydslConfig.java
-    │     │                 │     │     ├── RestTemplateConfig.java
-    │     │                 │     │     └── WebConfig.java
-    │     │                 │     ├── enums
-    │     │                 │     │     ├── PeriodType.java
-    │     │                 │     │     └── RankingType.java
-    │     │                 │     ├── exception
-    │     │                 │     │     ├── ErrorCode.java
-    │     │                 │     │     ├── ErrorResponse.java
-    │     │                 │     │     ├── exceptions
-    │     │                 │     │     │     ├── AWSException.java
-    │     │                 │     │     │     ├── BasicException.java
-    │     │                 │     │     │     ├── BookException.java
-    │     │                 │     │     │     ├── CommentException.java
-    │     │                 │     │     │     ├── MDCException.java
-    │     │                 │     │     │     ├── NaverSearchException.java
-    │     │                 │     │     │     ├── NotificationException.java
-    │     │                 │     │     │     ├── OcrException.java
-    │     │                 │     │     │     └── UserException.java
-    │     │                 │     │     ├── GlobalExceptionHandler.java
-    │     │                 │     │     └── package-info.java
-    │     │                 │     └── interceptor
-    │     │                 │         └── UserIdHeaderInterceptor.java
-    │     │                 ├── dashboard
-    │     │                 │     ├── batch
-    │     │                 │     │     ├── book
-    │     │                 │     │     │     ├── BookDashboardCreateBatchConfig.java
-    │     │                 │     │     │     └── BookDashboardScheduler.java
-    │     │                 │     │     ├── listener
-    │     │                 │     │     │     └── RankingListener.java
-    │     │                 │     │     ├── review
-    │     │                 │     │     │     ├── ReviewDashboardCreateBatchConfig.java
-    │     │                 │     │     │     └── ReviewDashboardScheduler.java
-    │     │                 │     │     └── user
-    │     │                 │     │         ├── UserDashboardJobConfig.java
-    │     │                 │     │         └── UserDashboardScheduler.java
-    │     │                 │     ├── controller
-    │     │                 │     │     └── DashboardController.java
-    │     │                 │     ├── dto
-    │     │                 │     │     ├── data
-    │     │                 │     │     │     ├── PopularReviewDto.java
-    │     │                 │     │     │     └── ReviewReaderItemDto.java
-    │     │                 │     │     └── response
-    │     │                 │     │         └── CursorPageResponsePopularReviewDto.java
-    │     │                 │     ├── entity
-    │     │                 │     │     └── Dashboard.java
-    │     │                 │     ├── repository
-    │     │                 │     │     ├── DashboardRepository.java
-    │     │                 │     │     ├── DashboardRepositoryCustom.java
-    │     │                 │     │     ├── DashboardRepositoryImpl.java
-    │     │                 │     │     ├── UserRepositoryExtension.java
-    │     │                 │     │     └── UserRepositoryExtensionImpl.java
-    │     │                 │     └── service
-    │     │                 │         └── DashboardService.java
-    │     │                 ├── like
-    │     │                 │     ├── adapter
-    │     │                 │     │     ├── in
-    │     │                 │     │     │     └── event
-    │     │                 │     │     │         └── LikeReviewEventHandler.java
-    │     │                 │     │     └── out
-    │     │                 │     │         ├── entity
-    │     │                 │     │         │     ├── ReviewLike.java
-    │     │                 │     │         │     └── ReviewLikeId.java
-    │     │                 │     │         └── repository
-    │     │                 │     │             └── LikeReviewJpaRepository.java
-    │     │                 │     ├── application
-    │     │                 │     │     ├── port
-    │     │                 │     │     │     ├── in
-    │     │                 │     │     │     │     ├── CancelReviewLikeUseCase.java
-    │     │                 │     │     │     │     ├── DeleteReviewLikesUseCase.java
-    │     │                 │     │     │     │     └── LikeReviewUseCase.java
-    │     │                 │     │     │     └── out
-    │     │                 │     │     │         └── SaveLikeReviewPort.java
-    │     │                 │     │     └── service
-    │     │                 │     │         └── LikeReviewCommandService.java
-    │     │                 │     └── package-info.java
-    │     │                 ├── notification
-    │     │                 │     ├── batch
-    │     │                 │     │     ├── NotificationDeleteBatchConfig.java
-    │     │                 │     │     ├── NotificationReadAllBatchConfig.java
-    │     │                 │     │     └── NotificationScheduler.java
-    │     │                 │     ├── controller
-    │     │                 │     │     └── NotificationController.java
-    │     │                 │     ├── entity
-    │     │                 │     │     ├── dto
-    │     │                 │     │     │     ├── NotificaionCursorDto.java
-    │     │                 │     │     │     ├── NotificationDto.java
-    │     │                 │     │     │     ├── request
-    │     │                 │     │     │     │     ├── NotificationCreateRequest.java
-    │     │                 │     │     │     │     └── NotificationUpdateRequest.java
-    │     │                 │     │     │     └── response
-    │     │                 │     │     │         └── NotificationCursorResponse.java
-    │     │                 │     │     └── Notification.java
-    │     │                 │     ├── NotificationComponent.java
-    │     │                 │     ├── package-info.java
-    │     │                 │     ├── repository
-    │     │                 │     │     ├── NotificationRepository.java
-    │     │                 │     │     ├── NotificationRepositoryDsl.java
-    │     │                 │     │     └── NotificationRepositoryDslImpl.java
-    │     │                 │     └── service
-    │     │                 │         ├── NotificationService.java
-    │     │                 │         └── NotificationServiceImpl.java
-    │     │                 ├── review
-    │     │                 │     ├── adapter
-    │     │                 │     │     ├── in
-    │     │                 │     │     │     └── web
-    │     │                 │     │     │         ├── ReviewApi.java
-    │     │                 │     │     │         ├── ReviewController.java
-    │     │                 │     │     │         └── ReviewControllerAdvice.java
-    │     │                 │     │     └── out
-    │     │                 │     │         ├── entity
-    │     │                 │     │         │     ├── Review.java
-    │     │                 │     │         │     └── ReviewStat.java
-    │     │                 │     │         ├── event
-    │     │                 │     │         │     └── ReviewEventPublisherAdapter.java
-    │     │                 │     │         ├── mapper
-    │     │                 │     │         │     ├── ReviewJpaMapper.java
-    │     │                 │     │         │     └── ReviewStatJpaMapper.java
-    │     │                 │     │         └── repository
-    │     │                 │     │             ├── ReviewBookJpaRepository.java
-    │     │                 │     │             ├── ReviewCommentJpaRepository.java
-    │     │                 │     │             ├── ReviewJpaRepository.java
-    │     │                 │     │             ├── ReviewLikeJpaRepository.java
-    │     │                 │     │             ├── ReviewNotificationRepository.java
-    │     │                 │     │             └── ReviewUserJpaRepository.java
-    │     │                 │     ├── application
-    │     │                 │     │     ├── dto
-    │     │                 │     │     │     ├── request
-    │     │                 │     │     │     │     ├── CursorPageRequestReviewDto.java
-    │     │                 │     │     │     │     ├── ReviewCreateRequest.java
-    │     │                 │     │     │     │     └── ReviewUpdateRequest.java
-    │     │                 │     │     │     └── response
-    │     │                 │     │     │         ├── CursorPageResponseReviewDto.java
-    │     │                 │     │     │         ├── ReviewDto.java
-    │     │                 │     │     │         └── ReviewLikeDto.java
-    │     │                 │     │     ├── port
-    │     │                 │     │     │     ├── in
-    │     │                 │     │     │     │     ├── CreateReviewUseCase.java
-    │     │                 │     │     │     │     ├── DeleteReviewUseCase.java
-    │     │                 │     │     │     │     ├── GetReviewUseCase.java
-    │     │                 │     │     │     │     ├── ToggleReviewLikeUseCase.java
-    │     │                 │     │     │     │     └── UpdateReviewUseCase.java
-    │     │                 │     │     │     └── out
-    │     │                 │     │     │         ├── LoadReviewBookPort.java
-    │     │                 │     │     │         ├── LoadReviewLikePort.java
-    │     │                 │     │     │         ├── LoadReviewPort.java
-    │     │                 │     │     │         ├── LoadReviewUserPort.java
-    │     │                 │     │     │         ├── ReviewEventPublisher.java
-    │     │                 │     │     │         ├── SaveReviewBookPort.java
-    │     │                 │     │     │         ├── SaveReviewCommentPort.java
-    │     │                 │     │     │         ├── SaveReviewNotificationPort.java
-    │     │                 │     │     │         ├── SaveReviewPort.java
-    │     │                 │     │     │         └── SaveReviewUserPort.java
-    │     │                 │     │     └── service
-    │     │                 │     │         ├── ReviewCommandService.java
-    │     │                 │     │         └── ReviewQueryService.java
-    │     │                 │     ├── domain
-    │     │                 │     │     ├── event
-    │     │                 │     │     │     ├── ReviewDeletedEvent.java
-    │     │                 │     │     │     ├── ReviewLikeCanceledEvent.java
-    │     │                 │     │     │     └── ReviewLikedEvent.java
-    │     │                 │     │     ├── exception
-    │     │                 │     │     │     ├── AlreadyExistsReviewException.java
-    │     │                 │     │     │     ├── InvalidReviewContentException.java
-    │     │                 │     │     │     ├── InvalidReviewCountException.java
-    │     │                 │     │     │     ├── InvalidReviewRatingException.java
-    │     │                 │     │     │     ├── ReviewBookNotFoundException.java
-    │     │                 │     │     │     ├── ReviewException.java
-    │     │                 │     │     │     ├── ReviewNotFoundException.java
-    │     │                 │     │     │     ├── ReviewPermissionDeniedException.java
-    │     │                 │     │     │     └── ReviewUserNotFoundException.java
-    │     │                 │     │     ├── model
-    │     │                 │     │     │     ├── ReviewBookDomain.java
-    │     │                 │     │     │     ├── ReviewContentDomain.java
-    │     │                 │     │     │     ├── ReviewCountDomain.java
-    │     │                 │     │     │     ├── ReviewDomain.java
-    │     │                 │     │     │     ├── ReviewLikeDomain.java
-    │     │                 │     │     │     ├── ReviewLikeNotificationDomain.java
-    │     │                 │     │     │     ├── ReviewRatingDomain.java
-    │     │                 │     │     │     ├── ReviewStatDomain.java
-    │     │                 │     │     │     └── ReviewUserDomain.java
-    │     │                 │     │     └── service
-    │     │                 │     │         └── ReviewService.java
-    │     │                 │     └── package-info.java
-    │     │                 ├── Sb06DeokhugamTeam2Application.java
-    │     │                 └── user
-    │     │                     ├── controller
-    │     │                     │     └── UserController.java
-    │     │                     ├── dto
-    │     │                     │     ├── CursorPageResponse.java
-    │     │                     │     ├── PowerUserDto.java
-    │     │                     │     ├── UserDto.java
-    │     │                     │     ├── UserLoginRequest.java
-    │     │                     │     ├── UserRegisterRequest.java
-    │     │                     │     └── UserUpdateRequest.java
-    │     │                     ├── entity
-    │     │                     │     └── User.java
-    │     │                     ├── mapper
-    │     │                     │     └── UserMapper.java
-    │     │                     ├── package-info.java
-    │     │                     ├── repository
-    │     │                     │     ├── UserQueryRepository.java
-    │     │                     │     └── UserRepository.java
-    │     │                     ├── scheduler
-    │     │                     │     └── UserBatchScheduler.java
-    │     │                     └── service
-    │     │                         └── UserService.java
-    │     └── resources
-    │         ├── application-local.yaml
-    │         ├── application-prod.yaml
-    │         ├── application.yaml
-    │         ├── db
-    │         │     └── migration
-    │         │         ├── V1__init.sql
-    │         │         ├── V2__change_table_names.sql
-    │         │         ├── V3__remove_redundant_colums.sql
-    │         │         ├── V4__add_cascade.sql
-    │         │         └── V5__add_version_to_book.sql
-    │         ├── logback-spring.xml
-    └── test
-        ├── java
-        │     └── com
-        │         └── codeit
-        │             └── sb06deokhugamteam2
-        │                 ├── book
-        │                 │     ├── BookIntegrationTest.java
-        │                 │     ├── fixture
-        │                 │     │     └── BookFixture.java
-        │                 │     └── repository
-        │                 │         └── BookVersionWithSQLRestrictionRepositoryTest.java
-        │                 ├── comment
-        │                 │     └── CommentIntegrationTest.java
-        │                 ├── dashboard
-        │                 │     ├── DashboardIntegrationTest.java
-        │                 │     └── fixture
-        │                 │         └── DashboardFixture.java
-        │                 ├── notification
-        │                 │     └── NotificationTest.java
-        │                 ├── review
-        │                 │     └── ReviewTest.java
-        │                 ├── Sb06DeokhugamTeam2ApplicationTests.java
-        │                 └── user
-        │                     └── UserControllerIntegrationTest.java
-        └── resources
-            └── application-test.yaml
+| 분류                   | 기술                                                     |
+| -------------------- | ------------------------------------------------------ |
+| Language             | Java 17                                                |
+| Framework            | Spring Boot 3.5.8, Spring Batch, Spring Retry          |
+| Data Access          | Spring Data JPA, QueryDSL                              |
+| Database / Migration | PostgreSQL, H2, Flyway                                 |
+| External Integration | OCR SPACE API, OkHttp                                  |
+| Infrastructure       | Docker, AWS ECS, RDS, S3, ECR                          |
+| CI/CD                | GitHub Actions                                         |
+| Other                | MapStruct, Lombok, Springdoc OpenAPI, Datasource Proxy |
+
+---
+
+## 🚀 로컬 실행 방법
+
+### 사전 요구사항
+
+- Docker & Docker Compose
+- 외부 연동 사용 시 OCR SPACE·AWS S3·Naver API 인증 정보
+
+### 실행
+
+```bash
+git clone https://github.com/HOGUN00/sb06-deokhugam-team2.git
+cd sb06-deokhugam-team2
+
+# 환경변수 설정
+cp .env.template .env
+
+# .env.template을 참고해 필요한 환경변수 입력
+
+# PostgreSQL과 애플리케이션 빌드·실행
+docker-compose up -d --build
 ```
 
 ---
 
-## 구현 홈페이지  
-(개발한 홈페이지에 대한 링크 게시)  
-[서비스 배포 링크](http://deokhugam-lb-2040232670.ap-northeast-2.elb.amazonaws.com/#/)
+## 👤 Author
 
----
-
-## 프로젝트 회고록  
-[발표자료](https://github.com/codeit-team2-intermediate-project/sb06-deokhugam-team2/wiki/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EC%B5%9C%EC%A2%85-%EB%B0%9C%ED%91%9C-%EB%B3%B4%EA%B3%A0%EC%84%9C)
+**이호건**  |  [GitHub](https://github.com/HOGUN00)
