@@ -86,18 +86,23 @@ RDS·S3·ECR 자원을 구성하고 Docker 멀티 스테이지 빌드와 GitHub 
 
 ### 사전 요구사항
 
-* Java 17
-* 외부 연동 사용 시 OCR SPACE·AWS S3·Naver API 인증 정보
+- Docker & Docker Compose
+- 외부 연동 사용 시 OCR SPACE·AWS S3·Naver API 인증 정보
 
 ### 실행
 
-실행 환경에 필요한 값을 설정한 뒤 애플리케이션을 시작합니다. 환경변수 이름은 `.env.template`과 `application.yaml`에서 확인할 수 있습니다.
-
 ```bash
-./gradlew bootRun
-```
+git clone https://github.com/HOGUN00/sb06-deokhugam-team2.git
+cd sb06-deokhugam-team2
 
-기본 프로필은 `local`이며 H2를 사용합니다. PostgreSQL 환경에서는 datasource URL·사용자·비밀번호와 사용할 프로필을 별도로 설정해야 합니다.
+# 환경변수 설정
+cp .env.template .env
+
+# .env.template을 참고해 필요한 환경변수 입력
+
+# PostgreSQL과 애플리케이션 빌드·실행
+docker-compose up -d --build
+```
 
 ---
 
