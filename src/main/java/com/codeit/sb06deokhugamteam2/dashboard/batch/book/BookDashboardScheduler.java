@@ -12,84 +12,51 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
 public class BookDashboardScheduler {
 
+    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+
     private final JobLauncher jobLauncher;
     private final Job createRankingBooksJob;
 
-    // 기본은 Asia/Seoul (KST) 타임존으로 스케쥴링 됨
     @Scheduled(cron = "0 0 0 * * ?")
     public void runDailyJob() {
-
-        try {
-            JobParameters params = new JobParametersBuilder()
-                    .addString("periodType", PeriodType.DAILY.name()) // enum → String
-                    .addLong("time", System.currentTimeMillis())      // 항상 새로운 파라미터 생성
-                    .toJobParameters();
-
-            jobLauncher.run(createRankingBooksJob, params);
-        } catch (Exception e) {
-            throw new BookException(
-                    ErrorCode.COMMON_EXCEPTION,
-                    Map.of("message", "Failed to run daily book ranking job"),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        runJob(PeriodType.DAILY, "Failed to run daily book ranking job");
     }
 
     @Scheduled(cron = "0 1 0 * * ?")
     public void runWeeklyJob() {
-
-        try {
-            JobParameters params = new JobParametersBuilder()
-                    .addString("periodType", PeriodType.WEEKLY.name())
-                    .addLong("time", System.currentTimeMillis())
-                    .toJobParameters();
-
-            jobLauncher.run(createRankingBooksJob, params);
-        } catch (Exception e) {
-            throw new BookException(
-                    ErrorCode.COMMON_EXCEPTION,
-                    Map.of("message", "Failed to run weekly book ranking job"),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        runJob(PeriodType.WEEKLY, "Failed to run weekly book ranking job");
     }
 
     @Scheduled(cron = "0 2 0 * * ?")
     public void runMonthlyJob() {
-
-        try {
-            JobParameters params = new JobParametersBuilder()
-                    .addString("periodType", PeriodType.MONTHLY.name())
-                    .addLong("time", System.currentTimeMillis())
-                    .toJobParameters();
-
-            jobLauncher.run(createRankingBooksJob, params);
-        } catch (Exception e) {
-            throw new BookException(
-                    ErrorCode.COMMON_EXCEPTION,
-                    Map.of("message", "Failed to run monthly book ranking job"),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        runJob(PeriodType.MONTHLY, "Failed to run monthly book ranking job");
     }
 
     @Scheduled(cron = "0 3 0 * * ?")
     public void runEntireJob() {
+        runJob(PeriodType.ALL_TIME, "Failed to run entire book ranking job");
+    }
 
+    private void runJob(PeriodType periodType, String errorMessage) {
         try {
             JobParameters params = new JobParametersBuilder()
-                    .addString("periodType", PeriodType.ALL_TIME.name())
-                    .addLong("time", System.currentTimeMillis())
+                    .addString("periodType", periodType.name())
+                    .addLocalDate("batchDate", LocalDate.now(SEOUL_ZONE))
                     .toJobParameters();
 
             jobLauncher.run(createRankingBooksJob, params);
         } catch (Exception e) {
             throw new BookException(
                     ErrorCode.COMMON_EXCEPTION,
-                    Map.of("message", "Failed to run entire book ranking job"),
+                    Map.of("message", errorMessage),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

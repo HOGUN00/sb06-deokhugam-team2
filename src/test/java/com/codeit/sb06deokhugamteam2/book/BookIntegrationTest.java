@@ -328,6 +328,7 @@ public class BookIntegrationTest {
         for(PeriodType period: periods) {
             JobParameters params = new JobParametersBuilder()
                     .addString("periodType", period.name())
+                    .addLocalDate("batchDate", LocalDate.now())
                     .addLong("time", System.currentTimeMillis())
                     .toJobParameters();
 

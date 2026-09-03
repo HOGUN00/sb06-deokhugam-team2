@@ -11,6 +11,7 @@ public record BookDashboardDto(
         Instant createdAt,
         long periodReviewCount,
         double periodRating,
-        double periodScore
+        double periodScore,
+        long rank
 ) {
 }

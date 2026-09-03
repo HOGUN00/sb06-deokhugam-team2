@@ -29,7 +29,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Configuration
 @RequiredArgsConstructor
@@ -53,7 +52,7 @@ public class BookDashboardCreateBatchConfig {
     public Step createDailyRankingBooksStep() {
         return new StepBuilder("createDailyRankingBooksStep", jobRepository)
                 .<BookDashboardDto, Dashboard>chunk(100, transactionManager)
-                .reader(createRankingBooksItemReader(null))
+                .reader(createRankingBooksItemReader(null, null))
                 .processor(createRankingBooksItemProcessor(null))
                 .writer(createRankingBooksWriter())
                 .faultTolerant()
@@ -65,17 +64,17 @@ public class BookDashboardCreateBatchConfig {
     @Bean
     @StepScope
     public JdbcCursorItemReader<BookDashboardDto> createRankingBooksItemReader(
-            @Value("#{jobParameters['periodType']}") PeriodType periodType
+            @Value("#{jobParameters['periodType']}") PeriodType periodType,
+            @Value("#{jobParameters['batchDate']}") LocalDate batchDate
     ) {
 
-        LocalDateTime since = null;
-
-        switch (periodType) {
-            case DAILY -> since = LocalDate.now().atStartOfDay().minusDays(1);
-            case WEEKLY -> since = LocalDate.now().atStartOfDay().minusDays(7);
-            case MONTHLY -> since = LocalDate.now().atStartOfDay().minusMonths(1);
-            case ALL_TIME -> since = LocalDateTime.of(1970, 1, 1, 0, 0);
-        }
+        LocalDateTime since = switch (periodType) {
+            case DAILY -> batchDate.minusDays(1).atStartOfDay();
+            case WEEKLY -> batchDate.minusDays(7).atStartOfDay();
+            case MONTHLY -> batchDate.minusMonths(1).atStartOfDay();
+            case ALL_TIME -> LocalDateTime.of(1970, 1, 1, 0, 0);
+        };
+        LocalDateTime until = batchDate.atStartOfDay();
 
         /*
          1. 계산된 점수 기준 내림차순 정렬
@@ -85,26 +84,42 @@ public class BookDashboardCreateBatchConfig {
          5. 리뷰가 없는 도서는 제외
          */
         String nativeQuery = """
-                                SELECT b.id, b.created_at, COUNT(r.book_id) AS review_count, SUM(r.rating) AS rating_sum,
-                                       (COUNT(r.book_id) * 0.4 + SUM(r.rating) / COUNT(r.book_id) * 0.6) AS score
-                                FROM books as b
-                                LEFT JOIN reviews as r ON b.id = r.book_id
-                                AND r.created_at >= ?
-                                WHERE b.deleted = false
-                                GROUP BY b.id, b.created_at
-                                HAVING COUNT(r.book_id) > 0
-                                ORDER BY score DESC, b.created_at DESC
+                                SELECT scored.id,
+                                       scored.created_at,
+                                       scored.review_count,
+                                       scored.rating_sum,
+                                       scored.score,
+                                       ROW_NUMBER() OVER (
+                                           ORDER BY scored.score DESC, scored.created_at DESC, scored.id ASC
+                                       ) AS rank
+                                FROM (
+                                    SELECT b.id,
+                                           b.created_at,
+                                           COUNT(*) AS review_count,
+                                           SUM(r.rating) AS rating_sum,
+                                           COUNT(*) * 0.4 + AVG(r.rating) * 0.6 AS score
+                                    FROM books AS b
+                                    JOIN reviews AS r ON b.id = r.book_id
+                                        AND r.deleted = false
+                                        AND r.created_at >= ?
+                                        AND r.created_at < ?
+                                    WHERE b.deleted = false
+                                    GROUP BY b.id, b.created_at
+                                ) scored
+                                ORDER BY rank
                 """;
 
         final LocalDateTime finalSince = since;
+        final LocalDateTime finalUntil = until;
 
         return new JdbcCursorItemReaderBuilder<BookDashboardDto>()
                 .name("createRankingBooksItemReader")
                 .dataSource(dataSource)
                 .sql(nativeQuery)
-                .preparedStatementSetter(ps ->
-                    ps.setTimestamp(1, Timestamp.valueOf(finalSince))
-                )
+                .preparedStatementSetter(ps -> {
+                    ps.setTimestamp(1, Timestamp.valueOf(finalSince));
+                    ps.setTimestamp(2, Timestamp.valueOf(finalUntil));
+                })
                 .rowMapper((rs, rowNum) -> {
                     UUID id = UUID.fromString(rs.getString("id"));
                     long reviewCount = rs.getLong("review_count");
@@ -116,6 +131,7 @@ public class BookDashboardCreateBatchConfig {
                             .periodReviewCount(reviewCount)
                             .periodRating(rating)
                             .periodScore(score)
+                            .rank(rs.getLong("rank"))
                             .build();
                 })
                 .build();
@@ -129,14 +145,12 @@ public class BookDashboardCreateBatchConfig {
         /*
         정렬된 순서대로 랭크 부여
          */
-        AtomicLong rank = new AtomicLong(1L);   // 객체 생성시 한번만 호출됨
         return bookDashboardDto ->
-                // 프로세스 호출될 때마다 rank 값 1씩 증가
                 Dashboard.builder()
                         .entityId(bookDashboardDto.id())
                         .rankingType(RankingType.BOOK)
                         .periodType(periodType)
-                        .rank(rank.getAndIncrement())
+                        .rank(bookDashboardDto.rank())
                         .score(bookDashboardDto.periodScore())
                         .build();
     }
