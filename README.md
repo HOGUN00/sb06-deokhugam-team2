@@ -27,7 +27,7 @@
 
 | 담당 영역 | 핵심 기술·구현 |
 |---|---|
-| 도서 동시성 제어 | JPA `@Version` · Spring Retry · 수정·논리 삭제 충돌 처리 |
+| 도서 동시성 제어 | JPA @Version · 수정·논리 삭제 충돌 처리 · 프로젝트 종료 후 자동 Retry 제거 → 409 Conflict로 개선 |
 | 인기 도서 | Spring Batch · 기간별 순위 생성·커서 조회 |
 | 도서 삭제 | `@SQLRestriction` · bulk UPDATE · PostgreSQL FK cascade |
 | OCR 기반 ISBN 인식 | OCR SPACE · OkHttp · ISBN 후보 추출 |
@@ -42,7 +42,7 @@
 
 ### 1. 낙관적 락과 동시성 제어
 
-도서 수정·논리 삭제 충돌은 JPA `@Version`으로 감지합니다. PostgreSQL 동시성 검증에서 자동 Retry가 앞선 사용자 변경을 덮을 수 있음을 확인해 Retry를 제거하고, 충돌은 `409 Conflict`로 반환하도록 개선했습니다.
+도서 수정·논리 삭제 충돌은 JPA `@Version`으로 감지합니다. 프로젝트 종료 후 PostgreSQL 동시성 검증에서 자동 Retry가 앞선 사용자 변경을 덮을 수 있음을 확인해 Retry를 제거하고, 충돌은 `409 Conflict`로 반환하도록 개선했습니다.
 
 ### 2. 인기 도서 배치와 커서 조회
 
