@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: discodeit_db
+      POSTGRES_DB: deokhugam_db
       TZ: Asia/Seoul
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
@@ -13,7 +13,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d discodeit_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d deokhugam_db"]
       interval: 5s
       timeout: 5s
       retries: 10

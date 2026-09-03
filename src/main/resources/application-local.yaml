@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/discodeit_db
+    url: jdbc:postgresql://localhost:5432/deokhugam_db
     username: postgres
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
