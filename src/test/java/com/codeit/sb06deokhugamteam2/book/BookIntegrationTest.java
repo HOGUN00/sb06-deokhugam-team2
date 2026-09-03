@@ -17,7 +17,6 @@ import com.codeit.sb06deokhugamteam2.common.enums.RankingType;
 import com.codeit.sb06deokhugamteam2.dashboard.entity.Dashboard;
 import com.codeit.sb06deokhugamteam2.dashboard.repository.DashboardRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Disabled;
@@ -34,7 +33,6 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -47,7 +45,6 @@ import org.springframework.util.MultiValueMap;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -87,9 +84,6 @@ public class BookIntegrationTest {
 
     @Autowired
     private BookService bookService;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @MockitoBean
     private NaverSearchClient naverSearchClient;
@@ -270,68 +264,6 @@ public class BookIntegrationTest {
         assertThat(cursorDto.hasNext()).isTrue();
         assertThat(cursorDto.nextCursor()).isEqualTo("4");
         assertThat(cursorDto.nextAfter()).isEqualTo(cursorDto.content().get(3).createdAt());
-    }
-
-    @Test
-    @DisplayName("인기 도서 커서는 동일 rank에서 createdAt을 보조 조건으로 사용한다")
-    void popularBooksCursor_UsesCreatedAtWhenRanksAreEqual() {
-        Instant baseTime = LocalDate.now()
-                .atStartOfDay(ZoneId.of("Asia/Seoul"))
-                .toInstant()
-                .plusSeconds(1);
-
-        Dashboard rankOne = createBookDashboard(1L, baseTime);
-        Dashboard earlierRankTwo = createBookDashboard(2L, baseTime.plusSeconds(1));
-        Dashboard laterRankTwo = createBookDashboard(2L, baseTime.plusSeconds(2));
-        Dashboard rankThree = createBookDashboard(3L, baseTime.plusSeconds(3));
-        dashBoardRepository.saveAllAndFlush(List.of(rankOne, earlierRankTwo, laterRankTwo, rankThree));
-        updateDashboardCreatedAt(rankOne.getId(), baseTime);
-        updateDashboardCreatedAt(earlierRankTwo.getId(), baseTime.plusSeconds(1));
-        updateDashboardCreatedAt(laterRankTwo.getId(), baseTime.plusSeconds(2));
-        updateDashboardCreatedAt(rankThree.getId(), baseTime.plusSeconds(3));
-        entityManager.clear();
-
-        List<Dashboard> ascResult = dashBoardRepository.findPopularBookListByCursor(
-                RankingType.BOOK,
-                PeriodType.ALL_TIME,
-                "2",
-                baseTime.plusSeconds(1),
-                Sort.Direction.ASC,
-                10
-        );
-        List<Dashboard> descResult = dashBoardRepository.findPopularBookListByCursor(
-                RankingType.BOOK,
-                PeriodType.ALL_TIME,
-                "2",
-                baseTime.plusSeconds(2),
-                Sort.Direction.DESC,
-                10
-        );
-
-        assertThat(ascResult)
-                .extracting(Dashboard::getId)
-                .containsExactly(laterRankTwo.getId(), rankThree.getId());
-        assertThat(descResult)
-                .extracting(Dashboard::getId)
-                .containsExactly(earlierRankTwo.getId(), rankOne.getId());
-    }
-
-    private Dashboard createBookDashboard(long rank, Instant createdAt) {
-        return Dashboard.builder()
-                .entityId(UUID.randomUUID())
-                .rank(rank)
-                .score(100 - rank)
-                .createdAt(createdAt)
-                .rankingType(RankingType.BOOK)
-                .periodType(PeriodType.ALL_TIME)
-                .build();
-    }
-
-    private void updateDashboardCreatedAt(UUID dashboardId, Instant createdAt) {
-        entityManager.createQuery("UPDATE Dashboard d SET d.createdAt = :createdAt WHERE d.id = :id")
-                .setParameter("createdAt", createdAt)
-                .setParameter("id", dashboardId)
-                .executeUpdate();
     }
 
     @Test

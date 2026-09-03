@@ -64,19 +64,14 @@ public class DashboardRepositoryImpl implements DashboardRepositoryCustom {
         builder.and(dashboard.createdAt.goe(today));
 
         if (cursor != null && after != null) {
-            long rankCursor = Long.parseLong(cursor);
-
             if (direction == Sort.Direction.ASC) {
                 builder.and(
-                        dashboard.rank.gt(rankCursor)
-                                .or(dashboard.rank.eq(rankCursor)
-                                        .and(dashboard.createdAt.gt(after)))
+                        dashboard.rank.gt(Long.parseLong(cursor))
                 );
+
             } else {
                 builder.and(
-                        dashboard.rank.lt(rankCursor)
-                                .or(dashboard.rank.eq(rankCursor)
-                                        .and(dashboard.createdAt.lt(after)))
+                        dashboard.rank.lt(Long.parseLong(cursor))
                 );
             }
         }
