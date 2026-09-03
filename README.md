@@ -28,7 +28,7 @@
 | 담당 영역 | 핵심 기술·구현 |
 |---|---|
 | 도서 동시성 제어 | JPA `@Version` · Spring Retry · 수정·논리 삭제 충돌 처리 |
-| 인기 도서 | Spring Batch · QueryDSL · 기간별 순위 생성·커서 조회 |
+| 인기 도서 | Spring Batch · 기간별 순위 생성·커서 조회 |
 | 도서 삭제 | `@SQLRestriction` · bulk UPDATE · PostgreSQL FK cascade |
 | OCR 기반 ISBN 인식 | OCR SPACE · OkHttp · ISBN 후보 추출 |
 | AWS 배포 | ECS · RDS · S3 · ECR · GitHub Actions |
@@ -46,7 +46,7 @@
 
 ### 2. 인기 도서 배치와 커서 조회
 
-공통 `dashboard` 테이블을 설계하고 Spring Batch로 기간별 인기 도서 순위를 미리 생성·저장한 뒤, QueryDSL 커서 방식으로 조회했습니다.
+공통 `dashboard` 테이블을 설계하고 Spring Batch로 기간별 인기 도서 순위를 미리 생성·저장한 뒤, 커서 방식으로 조회했습니다.
 
 ### 3. 도서 논리 삭제와 전파 방식
 
@@ -68,12 +68,11 @@ RDS·S3·ECR 자원을 구성하고 Docker 멀티 스테이지 빌드와 GitHub 
 | -------------------- | ------------------------------------------------------ |
 | Language             | Java 17                                                |
 | Framework            | Spring Boot 3.5.8, Spring Batch                        |
-| Data Access          | Spring Data JPA, QueryDSL                              |
-| Database / Migration | PostgreSQL, H2, Flyway                                 |
-| External Integration | OCR SPACE API, OkHttp                                  |
+| Data Access          | Spring Data JPA                                        |
+| Database             | PostgreSQL                                             |
+| External Integration | OCR SPACE API                                          |
 | Infrastructure       | Docker, AWS ECS, RDS, S3, ECR                          |
 | CI/CD                | GitHub Actions                                         |
-| Other                | MapStruct, Lombok                                       |
 
 ---
 
