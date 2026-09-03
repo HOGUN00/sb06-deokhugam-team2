@@ -25,10 +25,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Configuration
 @RequiredArgsConstructor
@@ -85,19 +83,14 @@ public class BookDashboardCreateBatchConfig {
          */
         String nativeQuery = """
                                 SELECT scored.id,
-                                       scored.created_at,
-                                       scored.review_count,
-                                       scored.rating_sum,
-                                       scored.score,
+                                       scored.period_score,
                                        ROW_NUMBER() OVER (
-                                           ORDER BY scored.score DESC, scored.created_at DESC, scored.id ASC
+                                           ORDER BY scored.period_score DESC, scored.created_at DESC, scored.id ASC
                                        ) AS rank
                                 FROM (
                                     SELECT b.id,
                                            b.created_at,
-                                           COUNT(*) AS review_count,
-                                           SUM(r.rating) AS rating_sum,
-                                           COUNT(*) * 0.4 + AVG(r.rating) * 0.6 AS score
+                                           COUNT(*) * 0.4 + AVG(r.rating) * 0.6 AS period_score
                                     FROM books AS b
                                     JOIN reviews AS r ON b.id = r.book_id
                                         AND r.deleted = false
@@ -120,20 +113,7 @@ public class BookDashboardCreateBatchConfig {
                     ps.setTimestamp(1, Timestamp.valueOf(finalSince));
                     ps.setTimestamp(2, Timestamp.valueOf(finalUntil));
                 })
-                .rowMapper((rs, rowNum) -> {
-                    UUID id = UUID.fromString(rs.getString("id"));
-                    long reviewCount = rs.getLong("review_count");
-                    double rating = rs.getDouble("rating_sum") / reviewCount;
-                    double score = rs.getDouble("score");
-                    return BookDashboardDto.builder()
-                            .id(id)
-                            .createdAt(rs.getTimestamp("created_at").toInstant())
-                            .periodReviewCount(reviewCount)
-                            .periodRating(rating)
-                            .periodScore(score)
-                            .rank(rs.getLong("rank"))
-                            .build();
-                })
+                .dataRowMapper(BookDashboardDto.class)
                 .build();
     }
 
