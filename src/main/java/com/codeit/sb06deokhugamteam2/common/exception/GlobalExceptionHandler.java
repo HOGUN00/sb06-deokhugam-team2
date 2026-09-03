@@ -169,7 +169,11 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
   public ResponseEntity<ErrorResponse> handleOptimisticLockingFailure(
       ObjectOptimisticLockingFailureException ex) {
-    ErrorResponse error = createErrorResponse(ex, HttpStatus.CONFLICT, Map.of());
+    ErrorResponse error = createErrorResponse(
+        ex,
+        HttpStatus.CONFLICT,
+        Map.of(),
+        ErrorCode.BOOK_STATE_CONFLICT);
     log.error(ex.getMessage(), ex,error.getMessage());
     return ResponseEntity.status(error.getStatus()).body(error);
   }
@@ -186,8 +190,16 @@ public class GlobalExceptionHandler {
   // <editor-fold desc="에러 양식 생성하는 부분 (클라이언트에 리턴하는 양식)">
   private ErrorResponse createErrorResponse(Exception ex, HttpStatus status, Map<String, Object> errorDetails) {
 
+    return createErrorResponse(ex, status, errorDetails, ErrorCode.COMMON_EXCEPTION);
+  }
+
+  private ErrorResponse createErrorResponse(
+      Exception ex,
+      HttpStatus status,
+      Map<String, Object> errorDetails,
+      ErrorCode errorCode) {
+
     Instant timeStamp = Instant.now();
-    ErrorCode errorCode = ErrorCode.COMMON_EXCEPTION;
 
     try {
       ErrorResponse error = ErrorResponse.builder()

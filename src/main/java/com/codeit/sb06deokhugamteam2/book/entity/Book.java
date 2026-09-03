@@ -85,12 +85,11 @@ public class Book {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public void updateAll(String title, String author, String description, String publisher, LocalDate publishedDate, String thumbnailUrl) {
+    public void updateDetails(String title, String author, String description, String publisher, LocalDate publishedDate) {
         this.title = title;
         this.author = author;
         this.description = description;
         this.publisher = publisher;
         this.publishedDate = publishedDate;
-        this.thumbnailUrl = thumbnailUrl;
     }
 }

@@ -27,9 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -91,11 +88,6 @@ public class BookService {
         return naverSearchClient.bookSearchByIsbn(isbn);
     }
 
-    @Retryable(
-            retryFor = {ObjectOptimisticLockingFailureException.class},
-            maxAttempts = 100,
-            backoff = @Backoff(delay = 100)
-    )
     public BookDto update(UUID bookId, BookUpdateRequest bookUpdateRequest, Optional<BookImageCreateRequest> optionalBookImageCreateRequest) {
         Book findBook = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookException(
@@ -103,7 +95,15 @@ public class BookService {
                         Map.of("bookId", bookId),
                         HttpStatus.NOT_FOUND));
 
-        String thumbnailUrl = optionalBookImageCreateRequest.map(bookImageCreateRequest -> {
+        findBook.updateDetails(
+                bookUpdateRequest.getTitle(),
+                bookUpdateRequest.getAuthor(),
+                bookUpdateRequest.getDescription(),
+                bookUpdateRequest.getPublisher(),
+                bookUpdateRequest.getPublishedDate()
+        );
+
+        optionalBookImageCreateRequest.ifPresent(bookImageCreateRequest -> {
             if (findBook.getThumbnailUrl() != null) {
                 String url = findBook.getThumbnailUrl();
                 String oldKey = url.substring(url.lastIndexOf("/") + 1);
@@ -111,22 +111,8 @@ public class BookService {
             }
             String newKey = findBook.getId().toString() + "-" + bookImageCreateRequest.getOriginalFilename();
             s3Storage.putThumbnail(newKey, bookImageCreateRequest.getBytes(), bookImageCreateRequest.getContentType());
-            return s3Storage.getThumbnail(newKey);
-        }).orElseGet(() -> {
-            if (findBook.getThumbnailUrl() != null) {
-                return findBook.getThumbnailUrl();
-            }
-            return null;
+            findBook.updateThumbnailUrl(s3Storage.getThumbnail(newKey));
         });
-
-        findBook.updateAll(
-                bookUpdateRequest.getTitle(),
-                bookUpdateRequest.getAuthor(),
-                bookUpdateRequest.getDescription(),
-                bookUpdateRequest.getPublisher(),
-                bookUpdateRequest.getPublishedDate(),
-                thumbnailUrl
-        );
 
         return bookMapper.toDto(findBook);
     }
@@ -232,16 +218,6 @@ public class BookService {
         return bookCursorMapper.toCursorBookDto(popularBookDtoList, hasNext, nextCursor, nextAfter);
     }
 
-    /*
-    1. 마지막 재시도 후 실패 시 낙관적 락 예외 그대로 throw
-    2. 버전 증가 시도를 하여야 낙관적 락 예외 발생하여 충돌 확인 가능
-    3. 버전 증가 시도는 dirty checking 시점에 이루어지므로 조회 후 setDeleted 흐름으로 작성
-     */
-    @Retryable(
-            retryFor = {ObjectOptimisticLockingFailureException.class},
-            maxAttempts = 100,
-            backoff = @Backoff(delay = 100)
-    )
     public void deleteSoft(UUID bookId) {
         Book findBook = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookException(
