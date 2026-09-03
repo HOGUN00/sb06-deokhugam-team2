@@ -35,6 +35,10 @@ jobs:
       DATABASE_PASSWORD: postgres
       AWS_S3_ACCESS_KEY: test
       AWS_S3_SECRET_KEY: test
+      AWS_S3_BUCKET: test-bucket
+      OCR_API_KEY: test
+      NAVER_CLIENT_ID: test
+      NAVER_CLIENT_SECRET: test
 
     steps:
       - name: Checkout code
