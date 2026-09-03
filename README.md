@@ -28,7 +28,7 @@
 
 | 담당 영역 | 핵심 기술·구현 |
 |---|---|
-| 도서 동시성 제어 | JPA `@Version` · PostgreSQL 동시성 검증 · `409 Conflict` 처리 |
+| 도서 동시성 제어 | JPA `@Version` · Spring Retry · 수정·논리 삭제 충돌 처리 |
 | 인기 도서 | Spring Batch · QueryDSL · 기간별 순위 생성·커서 조회 |
 | 도서 삭제 | `@SQLRestriction` · bulk UPDATE · PostgreSQL FK cascade |
 | OCR 기반 ISBN 인식 | OCR SPACE · OkHttp · ISBN 후보 추출 |
