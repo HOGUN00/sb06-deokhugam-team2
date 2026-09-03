@@ -66,14 +66,14 @@ class BookVersionWithSQLRestrictionRepositoryTest {
 
         // when
         Book savedBook = bookRepository.findById(book.getId()).orElseThrow();
-        book.updateAll(
+        book.updateDetails(
                 "new title",
                 "new author",
                 "new description",
                 "new publisher",
-                LocalDate.now(),
-                "new-thumbnail-url"
+                LocalDate.now()
         );
+        book.updateThumbnailUrl("new-thumbnail-url");
 
         bookRepository.save(savedBook);
         em.flush();
