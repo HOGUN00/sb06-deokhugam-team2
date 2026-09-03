@@ -73,7 +73,7 @@ RDS·S3·ECR 자원을 구성하고 Docker 멀티 스테이지 빌드와 GitHub 
 | External Integration | OCR SPACE API, OkHttp                                  |
 | Infrastructure       | Docker, AWS ECS, RDS, S3, ECR                          |
 | CI/CD                | GitHub Actions                                         |
-| Other                | MapStruct, Lombok, Springdoc OpenAPI, Datasource Proxy |
+| Other                | MapStruct, Lombok                                       |
 
 ---
 
