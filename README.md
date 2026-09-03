@@ -1,7 +1,7 @@
 # 📚 덕후감 (Deokhugam)
 
 > 도서 이미지 OCR·ISBN 매칭과 리뷰·댓글을 제공하는 독서 커뮤니티 서비스 \
-> 팀 프로젝트에서 도서 논리 삭제, OCR 기반 ISBN 인식, 인기 도서 배치, 낙관적 락과 AWS 배포를 담당하고 구현 이후 PostgreSQL 동시성 검증을 통해 충돌 처리 정책을 재검토하고 개선한 개인 포크
+> 팀 프로젝트 종료 후 PostgreSQL 동시성 검증을 통해 충돌 처리 정책을 재검토하고 개선한 개인 포크
 
 [![Java](https://img.shields.io/badge/Java-17-orange)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.8-green)](https://spring.io/projects/spring-boot)
@@ -12,7 +12,6 @@
 
 > 원본 프로젝트: [codeit-team2-intermediate-project/sb06-deokhugam-team2](https://github.com/codeit-team2-intermediate-project/sb06-deokhugam-team2) \
 > 팀 프로젝트: 백엔드 6인, 2025.11.21 ~ 12.12 \
-> 담당: 도서 논리 삭제·OCR·인기 도서·도서 동시성 제어·AWS 배포 \
 > 구현 이후: PostgreSQL 동시성 테스트로 낙관적 락과 Retry 동작을 검증하고, 충돌 처리 정책을 재검토해 자동 Retry 제거와 `409 Conflict` 응답으로 개선
 
 ---
