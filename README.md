@@ -16,22 +16,14 @@
 
 ---
 
-## 🏗️ 시스템 아키텍처
-
-> <img width="1800" height="1125" alt="deokhugam-architecture" src="https://github.com/user-attachments/assets/41720487-2889-442f-96b7-7813510e32f3" />
-
-
----
-
 ## 🙋 담당 기능 요약
 
 | 담당 영역 | 핵심 기술·구현 |
 |---|---|
-| 도서 동시성 제어 | JPA @Version · 수정·논리 삭제 충돌 처리 · 프로젝트 종료 후 자동 Retry 제거 → 409 Conflict로 개선 |
+| 도서 수정·삭제 | 논리 삭제 · JPA `@Version` 기반 충돌 처리 |
 | 인기 도서 | Spring Batch · 기간별 순위 생성 · 커서 기반 페이지네이션 |
-| 도서 삭제 | `@SQLRestriction` · bulk UPDATE · PostgreSQL FK cascade |
-| OCR 기반 ISBN 인식 | OCR SPACE · OkHttp · ISBN 후보 추출 |
-| AWS 배포 | ECS · RDS · S3 · ECR · GitHub Actions |
+| OCR 기반 ISBN 인식 | 도서 이미지에서 ISBN 추출 |
+| AWS 배포 | ECS 배포 환경 구성 · GitHub Actions 기반 배포 자동화 |
 
 ---
 
@@ -59,6 +51,12 @@
 ### AWS 배포
 
 RDS·S3·ECR 자원을 구성하고 Docker 멀티 스테이지 빌드와 GitHub Actions를 이용한 ECR–ECS 배포 흐름을 적용했습니다. ECS–RDS 연결 문제는 보안 그룹 규칙을 조정해 해결했습니다.
+
+---
+
+## 🏗️ 시스템 아키텍처
+
+> <img width="1800" height="1125" alt="deokhugam-architecture" src="https://github.com/user-attachments/assets/41720487-2889-442f-96b7-7813510e32f3" />
 
 ---
 
