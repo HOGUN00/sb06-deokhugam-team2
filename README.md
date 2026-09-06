@@ -7,7 +7,7 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.8-green)](https://spring.io/projects/spring-boot)
 
 🌐 [서비스 시연 영상](https://drive.google.com/file/d/1AnXWbv5S4cD82CHmEw06vByZOhNqHBoC/view)  | 
-📄 [개발리포트](https://app.notion.com/p/cf9203c86c59824b9d7d01f1f2a74229?source=copy_link)  | 
+📄 [기술 문서](https://app.notion.com/p/cf9203c86c59824b9d7d01f1f2a74229?source=copy_link)  | 
 🧭 [프로젝트 보드](https://github.com/orgs/codeit-team2-intermediate-project/projects/4/views/1)
 
 > 원본 프로젝트: [codeit-team2-intermediate-project/sb06-deokhugam-team2](https://github.com/codeit-team2-intermediate-project/sb06-deokhugam-team2) \
@@ -29,8 +29,7 @@
 
 ## 🔍 핵심 구현과 검증
 
-> 상세한 기술 선택 이유, 구현 흐름, 동시성 검증 결과와 개선 방향은 개발리포트에 정리했습니다.
-> 📄 [덕후감 개발리포트](https://app.notion.com/p/cf9203c86c59824b9d7d01f1f2a74229)
+> 상세한 기술 선택 이유, 구현 흐름, 동시성 검증 결과와 개선 방향은 [기술 문서](https://app.notion.com/p/cf9203c86c59824b9d7d01f1f2a74229)에 정리했습니다.
 
 ### 1. 낙관적 락과 동시성 제어
 
